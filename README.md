@@ -131,10 +131,10 @@ npx prisma db pull --print
 
 
 
-cd cartao
-ni cartao.controller.ts -ItemType File
-ni cartao.service.ts -ItemType File
-ni cartao.repository.ts -ItemType File
-ni cartao.routes.ts -ItemType File
-ni cartao.schema.ts -ItemType File
+cd forma-Pagamento
+ni formaPagamento.controller.ts -ItemType File
+ni formaPagamento.service.ts -ItemType File
+ni formaPagamento.repository.ts -ItemType File
+ni formaPagamento.routes.ts -ItemType File
+ni formaPagamento.schema.ts -ItemType File
 cd ..

@@ -3,6 +3,6 @@ import {BaseService} from '../shared/base/BaseService';
 export class CartaoService extends BaseService  {
 
     constructor() {
-        super(new CartaoRepository(),'codCatao')
+        super(new CartaoRepository(),'codcartao')
     }
 }

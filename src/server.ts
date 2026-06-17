@@ -9,6 +9,8 @@ import fastifyStatic from "@fastify/static";
 import { categoriaRoutes } from "./modules/categoria/categoria.routes";
 import { categoryRoutes } from "./modules/category/categoryRouter";
 import { cartaoRoutes } from "./modules/cartao/cartao.routes";
+import { contaRoutes } from "./modules/conta/conta.routes";
+import { formaPagamentoRoute } from "./modules/forma-pagamento/formaPagamento.routes";
 // import multipart from "@fastify/multipart"
 /**npm install @fastify/swagger @fastify/swagger-ui */
 // import { startCrons } from "../src/modules/ecommerce/cron/index";
@@ -119,6 +121,9 @@ const start = async () => {
 
     app.register(categoriaRoutes, { prefix: "/categoria" });
     app.register(cartaoRoutes, { prefix: "/cartao" });
+    app.register(contaRoutes, { prefix: "/conta" });
+    app.register(formaPagamentoRoute, { prefix: "/formaPagamento" });
+    
     
     // app.register(pathwayTypeRoutes, { prefix: "/pathwaytype"});
     // app.register(warehouseRoutes, { prefix: "/warehouse" });
