@@ -9,7 +9,8 @@ export function cartaoRoutes(app: FastifyInstance) {
 
   app.get('/', controller.findAll)
   app.get('/:id', controller.findById)
-  app.post('/', controller.create)
+  // app.post('/', controller.create)
+  app.post('/', controller.criar)
   app.put('/:id', controller.update)
   app.delete('/:id', controller.delete)
 }

@@ -128,13 +128,16 @@ npx prisma generate
 
 npx prisma db pull --print
 
+npm install zod-to-json-schema
+npm install fastify-type-provider-zod
 
 
-
-cd forma-Pagamento
-ni formaPagamento.controller.ts -ItemType File
-ni formaPagamento.service.ts -ItemType File
-ni formaPagamento.repository.ts -ItemType File
-ni formaPagamento.routes.ts -ItemType File
-ni formaPagamento.schema.ts -ItemType File
+cd movimentacao
+ni movimentacao.controller.ts -ItemType File
+ni movimentacao.service.ts -ItemType File
+ni movimentacao.repository.ts -ItemType File
+ni movimentacao.routes.ts -ItemType File
+ni movimentacao.schema.ts -ItemType File
 cd ..
+
+npm i @fastify/cors

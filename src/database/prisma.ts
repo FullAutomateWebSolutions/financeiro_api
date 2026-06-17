@@ -1,11 +1,25 @@
 import "dotenv/config";
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-// import { PrismaClient } from '../../generated/prisma/client'
 
-const connectionString = `${process.env.DATABASE_URL}`
+const connectionString = process.env.DATABASE_URL!;
 
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+const adapter = new PrismaPg({ connectionString });
 
-export { prisma }
+const prisma = new PrismaClient({ adapter }).$extends({
+  query: {
+    $allOperations: async ({ args, query }) => {
+      const result = await query(args);
+
+      return JSON.parse(
+        JSON.stringify(result, (_, value) =>
+          typeof value === "bigint"
+            ? value.toString()
+            : value
+        )
+      );
+    },
+  },
+});
+
+export { prisma };
