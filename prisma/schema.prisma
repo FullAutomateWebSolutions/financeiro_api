@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+    schemas  = ["gestao"]
+}
+
+model cartao {
+  codcartao        Int                @id @default(autoincrement())
+  tipocartao       String
+  desccartao       String
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+    @@schema("gestao")
+}
+
+model categoria {
+  codcategoria     Int                @id @default(autoincrement())
+  desccategoria    String
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+      @@schema("gestao")
+}
+
+model conta {
+  codconta         Int                @id @default(autoincrement())
+  tipoconta        String
+  descconta        String
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+      @@schema("gestao")
+}
+
+model formapagamento {
+  codformpag       Int                @id @default(autoincrement())
+  tipoformpag      String
+  descformpag      String
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+      @@schema("gestao")
+}
+
+model movimentacao {
+  codmovimentacao    BigInt             @id @default(autoincrement())
+  datamov            DateTime           @db.Timestamp(6)
+  descmovimento      String
+  valorunit          Decimal            @db.Decimal(12, 2)
+  porcjuros          Decimal?           @default(0) @db.Decimal(12, 2)
+  valorjuros         Decimal?           @default(0) @db.Decimal(12, 2)
+  tipoparcelamento   Int?
+  qtdparcatual       Int?
+  qtdparcfinal       Int?
+  qtdparcpendente    Int?
+  valortotalpendente Decimal?           @db.Decimal(12, 2)
+  datafimmov         DateTime?          @db.Timestamp(6)
+  codformpag         Int
+  codconta           Int
+  codstatus          Int
+  codcategoria       Int
+  codcartao          Int?
+  indativo           Boolean?           @default(true)
+  datacriacao        DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao    DateTime?          @default(now()) @db.Timestamp(6)
+  dataintegracao     DateTime?          @db.Timestamp(6)
+  datafechamento     DateTime?          @db.Timestamp(6)
+  cartao             cartao?            @relation(fields: [codcartao], references: [codcartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_cartao")
+  categoria          categoria          @relation(fields: [codcategoria], references: [codcategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_categoria")
+  conta              conta              @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_conta")
+  formapagamento     formapagamento     @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_formapag")
+  status             status             @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_status")
+  movimentacaohist   movimentacaohist[]
+
+  @@index([codcartao], map: "idx_mov_cartao")
+  @@index([codcategoria], map: "idx_mov_categoria")
+  @@index([codconta], map: "idx_mov_conta")
+  @@index([datamov], map: "idx_mov_data")
+  @@index([codstatus], map: "idx_mov_status")
+      @@schema("gestao")
+}
+
+model movimentacaohist {
+  codmovimentacaohist BigInt          @id @default(autoincrement())
+  codmovimentacao     BigInt?
+  datamov             DateTime?       @db.Timestamp(6)
+  descmovimento       String?
+  valorunit           Decimal?        @db.Decimal(12, 2)
+  tipoparcelamento    Int?
+  qtdparcatual        Int?
+  qtdparcfinal        Int?
+  qtdparcpendente     Int?
+  valortotalpendente  Decimal?        @db.Decimal(12, 2)
+  datafimmov          DateTime?       @db.Timestamp(6)
+  codformpag          Int?
+  codconta            Int?
+  codstatus           Int?
+  codcategoria        Int?
+  codcartao           Int?
+  indativo            Boolean?
+  datacriacao         DateTime?       @db.Timestamp(6)
+  dataatualizacao     DateTime?       @db.Timestamp(6)
+  dataintegracao      DateTime?       @db.Timestamp(6)
+  datafechamento      DateTime?       @db.Timestamp(6)
+  datahistorico       DateTime?       @default(now()) @db.Timestamp(6)
+  cartao              cartao?         @relation(fields: [codcartao], references: [codcartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_cartao")
+  categoria           categoria?      @relation(fields: [codcategoria], references: [codcategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_categoria")
+  conta               conta?          @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_conta")
+  formapagamento      formapagamento? @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_formapag")
+  movimentacao        movimentacao?   @relation(fields: [codmovimentacao], references: [codmovimentacao], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_mov")
+  status              status?         @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_status")
+    @@schema("gestao")
+}
+
+model status {
+  codstatus        Int                @id @default(autoincrement())
+  descstatus       String             @db.VarChar(100)
+  desccompleta     String?            @db.VarChar(255)
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+      @@schema("gestao")
+}
