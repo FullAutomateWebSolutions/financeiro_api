@@ -18,7 +18,6 @@ Prisma
 npx prisma init
 
 .env
-DATABASE_URL="postgresql://admin:h5PY1MI6krfwr_p9@163.176.246.55:5432/appdb?schema=gestao"
 
 Prisma
 npx prisma db pull
