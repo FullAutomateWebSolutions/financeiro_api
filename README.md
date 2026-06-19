@@ -132,6 +132,11 @@ npm install zod-to-json-schema
 npm install fastify-type-provider-zod
 npm i @fastify/cors
 
+
+npm install @fastify/jwt bcryptjs
+npm install -D @types/bcryptjs
+npm install @fastify/jwt
+
 mkdir status
 cd status
 ni status.controller.ts -ItemType File
@@ -140,3 +145,17 @@ ni status.repository.ts -ItemType File
 ni status.routes.ts -ItemType File
 ni status.schema.ts -ItemType File
 cd ..
+
+npm install bcryptjs
+npm install --save-dev @types/bcryptjs
+npm install bcrypt
+npm i --save-dev @types/bcrypt
+npm cache clean --force
+npm install bcrypt --legacy-peer-deps
+
+Faça uma requisição POST para http://localhost:3001/auth/register enviando nome, email e senha para criar seu usuário.
+Faça uma requisição POST para http://localhost:3001/auth/login enviando o email e senha. A API irá te devolver um objeto contendo a propriedade token.
+Copie esse texto do token. Quando for testar a listagem ou criação de movimentações, adicione o cabeçalho HTTP: Authorization: Bearer COLE_O_TOKEN_AQUI.
+
+ npm i --save-dev @types/jsonwebtoken
+ npm install dotenv

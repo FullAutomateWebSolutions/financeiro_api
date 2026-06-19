@@ -5,6 +5,9 @@ import { PrismaClient } from "@prisma/client";
 const connectionString = process.env.DATABASE_URL!;
 
 const adapter = new PrismaPg({ connectionString });
+// export const prisma = new PrismaClient({
+//   log: ['query', 'info', 'warn', 'error'],
+// });
 
 const prisma = new PrismaClient({ adapter }).$extends({
   query: {

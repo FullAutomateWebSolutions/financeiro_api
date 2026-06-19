@@ -1,4 +1,3 @@
-
 import { MovimentacaoRepository } from './movimentacao.repository'
 
 export class MovimentacaoService {
@@ -26,7 +25,7 @@ export class MovimentacaoService {
         return data
     }
 
-    async create(data: any) {
+    async create(data: any, codusuario: number) {
         const valorUnit = Number(data.valorunit || 0)
         const porcJuros = Number(data.porcjuros || 0)
         const qtdParcAtual = Number(data.qtdparcatual || 1)
@@ -36,6 +35,7 @@ export class MovimentacaoService {
         const parcelas = this.calcularParcelas(valorUnit, valorJuros, qtdParcAtual, qtdParcFinal)
         const dataFimMov = this.calcularDataFinal(new Date(data.datamov), qtdParcFinal)
 
+        // Envia o payload recalculado junto com o codusuario seguro para o repositório
         return this.repository.create({
             datamov: new Date(data.datamov),
             descmovimento: data.descmovimento,
@@ -56,59 +56,65 @@ export class MovimentacaoService {
             indativo: true,
             datacriacao: new Date(),
             dataatualizacao: new Date(),
-        })
+        }, codusuario)
     }
 
-async update(
-    codMovimentacao: number | string | bigint,
-    data: any,
-) {
-    const registroAtual = await this.repository.findById(codMovimentacao);
-    if (!registroAtual) {
-        throw new Error(`Movimentação com o ID ${codMovimentacao} não foi encontrada.`);
+    async update(
+        codMovimentacao: number | string | bigint,
+        codusuario: number,
+        data: any,
+    ) {
+        // Busca o registro e valida se ele realmente pertence ao usuário conectado antes de editar
+        const registroAtual = await this.repository.findById(codMovimentacao, codusuario);
+        if (!registroAtual) {
+            throw new Error(`Movimentação com o ID ${codMovimentacao} não foi encontrada ou não pertence a você.`);
+        }
+
+        const valorUnit = (data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '') 
+            ? Number(data.valorunit) 
+            : Number(registroAtual.valorunit);
+
+        const porcJuros = data.porcjuros !== undefined ? Number(data.porcjuros) : Number(registroAtual.porcjuros);
+        const qtdParcAtual = data.qtdparcatual !== undefined ? Number(data.qtdparcatual) : Number(registroAtual.qtdparcatual);
+        const qtdParcFinal = data.qtdparcfinal !== undefined ? Number(data.qtdparcfinal) : Number(registroAtual.qtdparcfinal);
+        
+        const dataMovRaw = data.datamov !== undefined ? data.datamov : registroAtual.datamov;
+        const dataMov = new Date(dataMovRaw);
+
+        const indativo = data.indativo !== undefined ? data.indativo : registroAtual.indativo;
+
+        const valorJuros = this.calcularJuros(valorUnit, porcJuros);
+        const parcelas = this.calcularParcelas(valorUnit, valorJuros, qtdParcAtual, qtdParcFinal);
+        const dataFimMov = this.calcularDataFinal(dataMov, qtdParcFinal);
+
+        const { valorunit, porcjuros, valorjuros, indativo: _, ...dadosRestantes } = data;
+
+        return this.repository.update(
+            codMovimentacao,
+            codusuario,
+            {
+                ...dadosRestantes,
+                datamov: dataMov,
+                valorunit: valorUnit,
+                porcjuros: porcJuros,
+                valorjuros: valorJuros,
+                qtdparcatual: qtdParcAtual,
+                qtdparcfinal: qtdParcFinal,
+                qtdparcpendente: parcelas.qtdparcpendente,
+                valortotalpendente: parcelas.valortotalpendente,
+                datafimmov: dataFimMov,
+                indativo: indativo, 
+            },
+        );
     }
 
-    const valorUnit = (data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '') 
-        ? Number(data.valorunit) 
-        : Number(registroAtual.valorunit);
-
-    const porcJuros = data.porcjuros !== undefined ? Number(data.porcjuros) : Number(registroAtual.porcjuros);
-    const qtdParcAtual = data.qtdparcatual !== undefined ? Number(data.qtdparcatual) : Number(registroAtual.qtdparcatual);
-    const qtdParcFinal = data.qtdparcfinal !== undefined ? Number(data.qtdparcfinal) : Number(registroAtual.qtdparcfinal);
-    
-    const dataMovRaw = data.datamov !== undefined ? data.datamov : registroAtual.datamov;
-    const dataMov = new Date(dataMovRaw);
-
-    const indativo = data.indativo !== undefined ? data.indativo : registroAtual.indativo;
-
-    const valorJuros = this.calcularJuros(valorUnit, porcJuros);
-    const parcelas = this.calcularParcelas(valorUnit, valorJuros, qtdParcAtual, qtdParcFinal);
-    const dataFimMov = this.calcularDataFinal(dataMov, qtdParcFinal);
-
-    const { valorunit, porcjuros, valorjuros, indativo: _, ...dadosRestantes } = data;
-
-    return this.repository.update(
-        codMovimentacao,
-        {
-            ...dadosRestantes,
-            datamov: dataMov,
-            valorunit: valorUnit,
-            porcjuros: porcJuros,
-            valorjuros: valorJuros,
-            qtdparcatual: qtdParcAtual,
-            qtdparcfinal: qtdParcFinal,
-            qtdparcpendente: parcelas.qtdparcpendente,
-            valortotalpendente: parcelas.valortotalpendente,
-            datafimmov: dataFimMov,
-            indativo: indativo, 
-        },
-    );
-}
     async finalizar(
         codMovimentacao: number | string | bigint,
+        codusuario: number,
     ) {
         return this.repository.update(
             codMovimentacao,
+            codusuario,
             {
                 datafechamento: new Date(),
                 indativo: false,
@@ -119,11 +125,15 @@ async update(
 
     async findById(
         codMovimentacao: number | string | bigint,
+        codusuario: number
     ) {
-        return this.repository.findById(codMovimentacao)
+        return this.repository.findById(codMovimentacao, codusuario)
     }
 
-    async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }) {
+    async findAll(
+        params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number },
+        codusuario: number
+    ) {
         const page = Number(params.page ?? 0);
         const size = Number(params.size ?? 10);
 
@@ -131,27 +141,24 @@ async update(
             ...params,
             page,
             size
-        });
+        }, codusuario);
     }
 
-  async delete(
+    async delete(
         codMovimentacao: number | string | bigint,
+        codusuario: number
     ) {
         try {
-            console.log(codMovimentacao)
-            return await this.repository.delete(codMovimentacao);
+            return await this.repository.delete(codMovimentacao, codusuario);
         } catch (error: any) {
             if (error.code === 'P2025') {
                 return null; 
             }
-            
             throw error;
         }
     }
     
-
-    async findAllView() {
-        return await this.repository.findAllView()
+    async findAllView(codusuario: number) {
+        return await this.repository.findAllView(codusuario)
     }
 }
-

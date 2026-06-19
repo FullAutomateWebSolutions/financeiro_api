@@ -76,6 +76,7 @@ model movimentacao {
   codstatus          Int
   codcategoria       Int
   codcartao          Int?
+  codusuario         Int
   indativo           Boolean?           @default(true)
   datacriacao        DateTime?          @default(now()) @db.Timestamp(6)
   dataatualizacao    DateTime?          @default(now()) @db.Timestamp(6)
@@ -86,6 +87,7 @@ model movimentacao {
   conta              conta              @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_conta")
   formapagamento     formapagamento     @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_formapag")
   status             status             @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_status")
+  usuario            usuario            @relation(fields: [codusuario], references: [codusuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_usuario")
   movimentacaohist   movimentacaohist[]
 
   @@index([codcartao], map: "idx_mov_cartao")
@@ -93,6 +95,7 @@ model movimentacao {
   @@index([codconta], map: "idx_mov_conta")
   @@index([datamov], map: "idx_mov_data")
   @@index([codstatus], map: "idx_mov_status")
+  @@index([codusuario], map: "idx_mov_usuario")
   @@schema("gestao")
 }
 
@@ -113,6 +116,7 @@ model movimentacaohist {
   codstatus           Int?
   codcategoria        Int?
   codcartao           Int?
+  codusuario          Int?
   indativo            Boolean?
   datacriacao         DateTime?       @db.Timestamp(6)
   dataatualizacao     DateTime?       @db.Timestamp(6)
@@ -125,6 +129,7 @@ model movimentacaohist {
   formapagamento      formapagamento? @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_formapag")
   movimentacao        movimentacao?   @relation(fields: [codmovimentacao], references: [codmovimentacao], onUpdate: NoAction, map: "fk_hist_mov")
   status              status?         @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_status")
+  usuario             usuario?        @relation(fields: [codusuario], references: [codusuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_usuario")
 
   @@schema("gestao")
 }
@@ -138,6 +143,29 @@ model status {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
+
+  @@schema("gestao")
+}
+
+model usuario {
+  codusuario       Int                @id @default(autoincrement())
+  nome             String             @db.VarChar(150)
+  email            String             @unique @db.VarChar(150)
+  senha            String             @db.VarChar(255)
+  role             usuario_role       @default(USER)
+  indativo         Boolean?           @default(true)
+  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  movimentacao     movimentacao[]
+  movimentacaohist movimentacaohist[]
+
+  @@schema("gestao")
+}
+
+enum usuario_role {
+  ADMIN
+  USER
+  MANAGER
 
   @@schema("gestao")
 }

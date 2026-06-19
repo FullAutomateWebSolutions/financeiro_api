@@ -1,5 +1,5 @@
 -- ==========================================================
--- BANCO DE DADOS FINANCEIRO
+-- BANCO DE DADOS FINANCEIRO (ATUALIZADO PARA JWT E ROLE ENUM)
 -- PostgreSQL - Versão Padronizada para Prisma ORM
 -- ==========================================================
 
@@ -12,6 +12,38 @@ BEGIN;
 CREATE SCHEMA IF NOT EXISTS gestao;
 
 SET search_path TO gestao;
+
+-- ==========================================================
+-- ENUMS (Necessário para mapeamento correto com Role do Prisma)
+-- ==========================================================
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE t.typname = 'usuario_role' AND n.nspname = 'gestao') THEN
+        CREATE TYPE gestao.usuario_role AS ENUM ('ADMIN', 'USER', 'MANAGER');
+    END IF;
+END $$;
+
+-- ==========================================================
+-- USUÁRIO (Atualizado com o campo ROLE)
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS gestao.usuario (
+    codusuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    role gestao.usuario_role NOT NULL DEFAULT 'USER',
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO gestao.usuario (nome, email, senha, role, indativo)
+SELECT 'Administrador Padrao', 'admin@sistema.com', '$2a$10$7R0Z.W.U6vXwIunZ2CmsEuXF8A6pSOnuFfJqGk3O7z.eLhIby.r2C', 'ADMIN', TRUE 
+WHERE NOT EXISTS (
+    SELECT 1 FROM gestao.usuario WHERE email = 'admin@sistema.com'
+);
 
 -- ==========================================================
 -- STATUS
@@ -129,6 +161,7 @@ CREATE TABLE IF NOT EXISTS gestao.movimentacao (
     codstatus INTEGER NOT NULL,
     codcategoria INTEGER NOT NULL,
     codcartao INTEGER,
+    codusuario INTEGER NOT NULL, 
     indativo BOOLEAN DEFAULT TRUE,
     datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -139,7 +172,8 @@ CREATE TABLE IF NOT EXISTS gestao.movimentacao (
     CONSTRAINT fk_mov_conta FOREIGN KEY (codconta) REFERENCES gestao.conta(codconta),
     CONSTRAINT fk_mov_status FOREIGN KEY (codstatus) REFERENCES gestao.status(codstatus),
     CONSTRAINT fk_mov_categoria FOREIGN KEY (codcategoria) REFERENCES gestao.categoria(codcategoria),
-    CONSTRAINT fk_mov_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao)
+    CONSTRAINT fk_mov_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao),
+    CONSTRAINT fk_mov_usuario FOREIGN KEY (codusuario) REFERENCES gestao.usuario(codusuario) 
 );
 
 -- ==========================================================
@@ -163,6 +197,7 @@ CREATE TABLE IF NOT EXISTS gestao.movimentacaohist (
     codstatus INTEGER,
     codcategoria INTEGER,
     codcartao INTEGER,
+    codusuario INTEGER, 
     indativo BOOLEAN,
     datacriacao TIMESTAMP,
     dataatualizacao TIMESTAMP,
@@ -175,7 +210,8 @@ CREATE TABLE IF NOT EXISTS gestao.movimentacaohist (
     CONSTRAINT fk_hist_conta FOREIGN KEY (codconta) REFERENCES gestao.conta(codconta),
     CONSTRAINT fk_hist_status FOREIGN KEY (codstatus) REFERENCES gestao.status(codstatus),
     CONSTRAINT fk_hist_categoria FOREIGN KEY (codcategoria) REFERENCES gestao.categoria(codcategoria),
-    CONSTRAINT fk_hist_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao)
+    CONSTRAINT fk_hist_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao),
+    CONSTRAINT fk_hist_usuario FOREIGN KEY (codusuario) REFERENCES gestao.usuario(codusuario)
 );
 
 -- ==========================================================
@@ -187,6 +223,7 @@ CREATE INDEX IF NOT EXISTS idx_mov_conta ON gestao.movimentacao(codconta);
 CREATE INDEX IF NOT EXISTS idx_mov_categoria ON gestao.movimentacao(codcategoria);
 CREATE INDEX IF NOT EXISTS idx_mov_cartao ON gestao.movimentacao(codcartao);
 CREATE INDEX IF NOT EXISTS idx_mov_data ON gestao.movimentacao(datamov);
+CREATE INDEX IF NOT EXISTS idx_mov_usuario ON gestao.movimentacao(codusuario);
 
 -- ==========================================================
 -- FUNÇÕES DO BANCO DE DADOS
@@ -203,20 +240,18 @@ BEGIN
 END;
 $$;
 
--- FUNÇÃO REESTRUTURADA: Captura o estado anterior (OLD) e retorna o estado modificado de forma segura para o ORM
 CREATE OR REPLACE FUNCTION gestao.fn_movimentacao_hist()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS
 $$
 BEGIN
-    -- Armazena o registro original completo na tabela de logs/histórico
     INSERT INTO gestao.movimentacaohist
     (
         codmovimentacao, datamov, descmovimento, valorunit,
         tipoparcelamento, qtdparcatual, qtdparcfinal, qtdparcpendente,
         valortotalpendente, datafimmov, codformpag, codconta,
-        codstatus, codcategoria, codcartao, indativo,
+        codstatus, codcategoria, codcartao, codusuario, indativo,
         datacriacao, dataatualizacao, dataintegracao, datafechamento
     )
     VALUES
@@ -224,16 +259,14 @@ BEGIN
         OLD.codmovimentacao, OLD.datamov, OLD.descmovimento, OLD.valorunit,
         OLD.tipoparcelamento, OLD.qtdparcatual, OLD.qtdparcfinal, OLD.qtdparcpendente,
         OLD.valortotalpendente, OLD.datafimmov, OLD.codformpag, OLD.codconta,
-        OLD.codstatus, OLD.codcategoria, OLD.codcartao, OLD.indativo,
+        OLD.codstatus, OLD.codcategoria, OLD.codcartao, OLD.codusuario, OLD.indativo,
         OLD.datacriacao, OLD.dataatualizacao, OLD.dataintegracao, OLD.datafechamento
     );
 
-    -- Determina o retorno apropriado baseado no tipo de operação interceptada
     IF TG_OP = 'DELETE' THEN
         RETURN OLD;
     END IF;
 
-    -- Em operações BEFORE UPDATE, retornar NEW permite a alteração e mantém compatibilidade com consultas RETURNING do Prisma
     RETURN NEW;
 END;
 $$;
@@ -256,7 +289,6 @@ ON gestao.movimentacao
 FOR EACH ROW
 EXECUTE FUNCTION gestao.fn_movimentacao_hist();
 
--- ALTERADO PARA BEFORE: Garante o fluxo de dados nativo do banco e impede Rollbacks lógicos no Prisma Client
 DROP TRIGGER IF EXISTS trg_movimentacao_hist ON gestao.movimentacao;
 CREATE TRIGGER trg_movimentacao_hist
 BEFORE UPDATE
@@ -287,7 +319,7 @@ INSERT INTO gestao.movimentacao
     datamov, descmovimento, valorunit, porcjuros, valorjuros,
     tipoparcelamento, qtdparcatual, qtdparcfinal, qtdparcpendente,
     valortotalpendente, datafimmov, codformpag, codconta,
-    codstatus, codcategoria, codcartao, indativo
+    codstatus, codcategoria, codcartao, codusuario, indativo
 )
 SELECT
     CURRENT_TIMESTAMP, 'Compra Mercado', 100.00, 5.00, 5.00,
@@ -297,6 +329,7 @@ SELECT
     (SELECT codstatus FROM gestao.status LIMIT 1),
     (SELECT codcategoria FROM gestao.categoria LIMIT 1),
     (SELECT codcartao FROM gestao.cartao LIMIT 1),
+    (SELECT codusuario FROM gestao.usuario LIMIT 1), 
     TRUE
 WHERE NOT EXISTS (
     SELECT 1 FROM gestao.movimentacao WHERE descmovimento = 'Compra Mercado'
@@ -308,7 +341,9 @@ COMMIT;
 -- VALIDAÇÃO FINAL
 -- ==========================================================
 
-SELECT 'STATUS' AS tabela, COUNT(*) registros FROM gestao.status
+SELECT 'USUARIO' AS tabela, COUNT(*) registros FROM gestao.usuario
+UNION ALL
+SELECT 'STATUS', COUNT(*) FROM gestao.status
 UNION ALL
 SELECT 'CONTA', COUNT(*) FROM gestao.conta
 UNION ALL

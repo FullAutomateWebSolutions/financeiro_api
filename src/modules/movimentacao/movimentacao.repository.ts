@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client'
 
 export class MovimentacaoRepository {
 
-    async create(data: any) {
+    async create(data: any, codusuario: number) {
         const valorunit = data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '' ? Number(data.valorunit) : 0;
         const porcjuros = data.porcjuros !== undefined && data.porcjuros !== null && data.porcjuros !== '' ? Number(data.porcjuros) : 0;
         const valorjuros = data.valorjuros !== undefined && data.valorjuros !== null && data.valorjuros !== '' ? Number(data.valorjuros) : 0;
@@ -30,6 +30,8 @@ export class MovimentacaoRepository {
                 datacriacao: data.datacriacao ? new Date(data.datacriacao) : new Date(),
                 dataatualizacao: data.dataatualizacao ? new Date(data.dataatualizacao) : new Date(),
 
+                // Conecta o relacionamento usando o id numérico mapeado do token
+                usuario: { connect: { codusuario: codusuario } },
                 categoria: { connect: { codcategoria: Number(data.codcategoria) } },
                 conta: { connect: { codconta: Number(data.codconta) } },
                 status: { connect: { codstatus: Number(data.codstatus) } },
@@ -44,6 +46,7 @@ export class MovimentacaoRepository {
 
     async update(
         codmovimentacao: number | string | bigint,
+        codusuario: number,
         data: any,
     ) {
         const idBigInt = BigInt(String(codmovimentacao).trim());
@@ -56,6 +59,7 @@ export class MovimentacaoRepository {
         return prisma.movimentacao.update({
             where: {
                 codmovimentacao: idBigInt,
+                codusuario: codusuario, // Garante que ninguém altere dados de outro usuário
             },
             data: {
                 datamov: data.datamov ? new Date(data.datamov) : undefined,
@@ -93,21 +97,26 @@ export class MovimentacaoRepository {
 
     async delete(
         codmovimentacao: number | string | bigint,
+        codusuario: number
     ) {
         const idBigInt = BigInt(String(codmovimentacao).trim());
+        
         return prisma.movimentacao.delete({
             where: {
                 codmovimentacao: idBigInt,
+                codusuario: codusuario
             },
         });
     }
 
     async findById(
         codmovimentacao: number | string | bigint,
+        codusuario: number
     ) {
-        return prisma.movimentacao.findUnique({
+        return prisma.movimentacao.findFirst({
             where: {
                 codmovimentacao: BigInt(String(codmovimentacao).trim()),
+                codusuario: codusuario
             },
             include: {
                 categoria: true,
@@ -119,10 +128,13 @@ export class MovimentacaoRepository {
         })
     }
 
-    async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }) {
+    async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }, codusuario: number) {
         const { page, size, sort, descmovimento, codcategoria, codconta } = params;
 
-        const where: any = {};
+        const where: any = {
+            codusuario: codusuario
+        };
+        
         if (descmovimento) {
             where.descmovimento = { contains: descmovimento, mode: 'insensitive' };
         }
@@ -165,10 +177,16 @@ export class MovimentacaoRepository {
         };
     }
 
-    async findAllView(): Promise<any[]> {
+    async findAllView(codusuario: number): Promise<any[]> {
         return prisma.$queryRaw`
-            SELECT *
-            FROM gestao.vw_resumo_financeiro
+            SELECT 
+                c.desccategoria,
+                SUM(m.valorunit) AS valor_total,
+                COUNT(*) AS quantidade
+            FROM gestao.movimentacao m
+            INNER JOIN gestao.categoria c ON c.codcategoria = m.codcategoria
+            WHERE m.codusuario = ${codusuario}
+            GROUP BY c.desccategoria
         `
     }
 }

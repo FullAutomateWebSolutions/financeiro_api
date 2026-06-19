@@ -1,15 +1,18 @@
+import 'dotenv/config';
 import fastify from "fastify";
-import cors from "@fastify/cors"; // 1. IMPORTAR O PLUGIN
+import cors from "@fastify/cors"; 
 import swagger from "@fastify/swagger";
 import swaggerUI from "@fastify/swagger-ui";
 import { ZodError } from "zod";
-
+import fastifyJwt from '@fastify/jwt';
 import { categoriaRoutes } from "./modules/categoria/categoria.routes";
 import { cartaoRoutes } from "./modules/cartao/cartao.routes";
 import { contaRoutes } from "./modules/conta/conta.routes";
 import { formaPagamentoRoute } from "./modules/forma-pagamento/formaPagamento.routes";
 import { movimentacaoRoutes } from "./modules/movimentacao/movimentacao.routes";
 import { statusRouter } from "./modules/status/status.routes";
+import { authRoutes } from "./modules/auth/auth.routes";
+import { usuarioRoutes } from "./modules/usuario/usuarioRoutes";
 
 const app = fastify({
   logger: true,
@@ -38,6 +41,16 @@ app.setErrorHandler(
       });
     }
 
+    if (error.statusCode === 401) {
+      return reply.status(401).send({
+        timestamp: new Date().toISOString(),
+        status: 401,
+        message: error.message || "Não autorizado",
+        path: request.url,
+        errors: [],
+      });
+    }
+
     request.log.error(error);
 
     return reply.status(500).send({
@@ -52,19 +65,36 @@ app.setErrorHandler(
 
 async function start() {
   try {
-    // 2. REGISTRAR O CORS LOGO NO INÍCIO DO START
+    // 1. REGISTRAR O CORS PRIMEIRO (Evita bloqueios no navegador)
     await app.register(cors, {
-      origin: "*", // Em desenvolvimento você pode usar '*', mas em produção mude para a URL do seu front
+      origin: "*", 
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     });
 
+    // 2. CONFIGURAR O @FASTIFY/JWT ( ESSENCIAL: DEVE VIR ANTES DAS ROTAS!)
+    await app.register(fastifyJwt, {
+      secret: process.env.JWT_SECRET || 'chave_secreta_reserva'
+    });
+
+    // 3. SWAGGER
     await app.register(swagger, {
       openapi: {
         info: {
           title: "FAWS - Financeiro Simples",
-          description: "API de Gestão Financeira",
+          description: "API de Gestão Financeira com isolamento por usuário (JWT)",
           version: "1.0.0",
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+              description: "Insira o token JWT retornado no login para acessar as rotas protegidas.",
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }],
       },
     });
 
@@ -77,13 +107,26 @@ async function start() {
       timestamp: new Date().toISOString(),
     }));
 
+    /* ==========================================
+        REGISTRO DAS ROTAS DO SISTEMA
+    ========================================== */
+    // Mudei o auth para cá, agora ele já enxerga o plugin do JWT carregado acima!
+    await app.register(authRoutes, {
+      prefix: "/auth",
+    });
+    
     await app.register(categoriaRoutes, {
       prefix: "/categoria",
     });
 
-      await app.register(statusRouter, {
+    await app.register(usuarioRoutes, {
+      prefix: "/usuario",
+    });
+
+    await app.register(statusRouter, {
       prefix: "/status",
     });
+
     await app.register(cartaoRoutes, {
       prefix: "/cartao",
     });
