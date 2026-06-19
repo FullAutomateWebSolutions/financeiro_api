@@ -1,15 +1,12 @@
-import { CategoriaRepository } from "./categoria.repository"
+import { BaseService } from '../shared/base/BaseService'
+import {CategoriaRepository  } from './categoria.repository'
 
-export class CategoriaService {
-  constructor(
-    private repository: CategoriaRepository,
-  ) {}
+export class CategoriaService
+extends BaseService
+{
+  private categoriaRepository =  new CategoriaRepository();
 
-  async create(data: any) {
-    return this.repository.create(data)
-  }
-
-  async findAll() {
-    return this.repository.findAll()
+  constructor() {
+    super( new CategoriaRepository(), 'codcategoria' )
   }
 }

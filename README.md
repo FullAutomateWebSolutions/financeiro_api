@@ -130,14 +130,13 @@ npx prisma db pull --print
 
 npm install zod-to-json-schema
 npm install fastify-type-provider-zod
-
-
-cd movimentacao
-ni movimentacao.controller.ts -ItemType File
-ni movimentacao.service.ts -ItemType File
-ni movimentacao.repository.ts -ItemType File
-ni movimentacao.routes.ts -ItemType File
-ni movimentacao.schema.ts -ItemType File
-cd ..
-
 npm i @fastify/cors
+
+mkdir status
+cd status
+ni status.controller.ts -ItemType File
+ni status.service.ts -ItemType File
+ni status.repository.ts -ItemType File
+ni status.routes.ts -ItemType File
+ni status.schema.ts -ItemType File
+cd ..

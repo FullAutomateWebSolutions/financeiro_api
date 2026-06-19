@@ -1,4 +1,3 @@
-// movimentacao.service.ts
 
 import { MovimentacaoRepository } from './movimentacao.repository'
 
@@ -7,44 +6,23 @@ export class MovimentacaoService {
         private repository = new MovimentacaoRepository(),
     ) {}
 
-    private calcularJuros(
-        valorUnit: number,
-        porcJuros: number,
-    ) {
-        return Number(
-            (valorUnit * (porcJuros / 100)).toFixed(2),
-        )
+    private calcularJuros(valorUnit: number, porcJuros: number) {
+        return Number((valorUnit * (porcJuros / 100)).toFixed(2))
     }
 
-    private calcularParcelas(
-        valorUnit: number,
-        valorJuros: number,
-        qtdParcAtual: number,
-        qtdParcFinal: number,
-    ) {
+    private calcularParcelas(valorUnit: number, valorJuros: number, qtdParcAtual: number, qtdParcFinal: number) {
         const pendentes = qtdParcFinal - qtdParcAtual
-
-        const totalPendente =
-            pendentes * (valorUnit + valorJuros)
+        const totalPendente = pendentes * (valorUnit + valorJuros)
 
         return {
             qtdparcpendente: pendentes,
-            valortotalpendente: Number(
-                totalPendente.toFixed(2),
-            ),
+            valortotalpendente: Number(totalPendente.toFixed(2)),
         }
     }
 
-    private calcularDataFinal(
-        dataMov: Date,
-        qtdParcFinal: number,
-    ) {
+    private calcularDataFinal(dataMov: Date, qtdParcFinal: number) {
         const data = new Date(dataMov)
-
-        data.setMonth(
-            data.getMonth() + (qtdParcFinal - 1),
-        )
-
+        data.setMonth(data.getMonth() + (qtdParcFinal - 1))
         return data
     }
 
@@ -54,106 +32,80 @@ export class MovimentacaoService {
         const qtdParcAtual = Number(data.qtdparcatual || 1)
         const qtdParcFinal = Number(data.qtdparcfinal || 1)
 
-        const valorJuros = this.calcularJuros(
-            valorUnit,
-            porcJuros,
-        )
-
-        const parcelas = this.calcularParcelas(
-            valorUnit,
-            valorJuros,
-            qtdParcAtual,
-            qtdParcFinal,
-        )
-
-        const dataFimMov = this.calcularDataFinal(
-            new Date(data.datamov),
-            qtdParcFinal,
-        )
+        const valorJuros = this.calcularJuros(valorUnit, porcJuros)
+        const parcelas = this.calcularParcelas(valorUnit, valorJuros, qtdParcAtual, qtdParcFinal)
+        const dataFimMov = this.calcularDataFinal(new Date(data.datamov), qtdParcFinal)
 
         return this.repository.create({
             datamov: new Date(data.datamov),
             descmovimento: data.descmovimento,
-
             valorunit: valorUnit,
             porcjuros: porcJuros,
             valorjuros: valorJuros,
-
-            tipoparcelamento:
-                data.tipoparcelamento,
-
+            tipoparcelamento: data.tipoparcelamento,
             qtdparcatual: qtdParcAtual,
             qtdparcfinal: qtdParcFinal,
-
-            qtdparcpendente:
-                parcelas.qtdparcpendente,
-
-            valortotalpendente:
-                parcelas.valortotalpendente,
-
+            qtdparcpendente: parcelas.qtdparcpendente,
+            valortotalpendente: parcelas.valortotalpendente,
             datafimmov: dataFimMov,
-
             codformpag: data.codformpag,
             codconta: data.codconta,
             codstatus: data.codstatus,
             codcategoria: data.codcategoria,
             codcartao: data.codcartao,
-
             indativo: true,
             datacriacao: new Date(),
             dataatualizacao: new Date(),
         })
     }
 
-    async update(
-        codMovimentacao: number,
-        data: any,
-    ) {
-        const valorUnit = Number(data.valorunit || 0)
-        const porcJuros = Number(data.porcjuros || 0)
-        const qtdParcAtual = Number(data.qtdparcatual || 1)
-        const qtdParcFinal = Number(data.qtdparcfinal || 1)
-
-        const valorJuros = this.calcularJuros(
-            valorUnit,
-            porcJuros,
-        )
-
-        const parcelas = this.calcularParcelas(
-            valorUnit,
-            valorJuros,
-            qtdParcAtual,
-            qtdParcFinal,
-        )
-
-        const dataFimMov = this.calcularDataFinal(
-            new Date(data.datamov),
-            qtdParcFinal,
-        )
-
-        return this.repository.update(
-            codMovimentacao,
-            {
-                ...data,
-
-                valorjuros: valorJuros,
-
-                qtdparcpendente:
-                    parcelas.qtdparcpendente,
-
-                valortotalpendente:
-                    parcelas.valortotalpendente,
-
-                datafimmov: dataFimMov,
-
-                dataatualizacao:
-                    new Date(),
-            },
-        )
+async update(
+    codMovimentacao: number | string | bigint,
+    data: any,
+) {
+    const registroAtual = await this.repository.findById(codMovimentacao);
+    if (!registroAtual) {
+        throw new Error(`Movimentação com o ID ${codMovimentacao} não foi encontrada.`);
     }
 
+    const valorUnit = (data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '') 
+        ? Number(data.valorunit) 
+        : Number(registroAtual.valorunit);
+
+    const porcJuros = data.porcjuros !== undefined ? Number(data.porcjuros) : Number(registroAtual.porcjuros);
+    const qtdParcAtual = data.qtdparcatual !== undefined ? Number(data.qtdparcatual) : Number(registroAtual.qtdparcatual);
+    const qtdParcFinal = data.qtdparcfinal !== undefined ? Number(data.qtdparcfinal) : Number(registroAtual.qtdparcfinal);
+    
+    const dataMovRaw = data.datamov !== undefined ? data.datamov : registroAtual.datamov;
+    const dataMov = new Date(dataMovRaw);
+
+    const indativo = data.indativo !== undefined ? data.indativo : registroAtual.indativo;
+
+    const valorJuros = this.calcularJuros(valorUnit, porcJuros);
+    const parcelas = this.calcularParcelas(valorUnit, valorJuros, qtdParcAtual, qtdParcFinal);
+    const dataFimMov = this.calcularDataFinal(dataMov, qtdParcFinal);
+
+    const { valorunit, porcjuros, valorjuros, indativo: _, ...dadosRestantes } = data;
+
+    return this.repository.update(
+        codMovimentacao,
+        {
+            ...dadosRestantes,
+            datamov: dataMov,
+            valorunit: valorUnit,
+            porcjuros: porcJuros,
+            valorjuros: valorJuros,
+            qtdparcatual: qtdParcAtual,
+            qtdparcfinal: qtdParcFinal,
+            qtdparcpendente: parcelas.qtdparcpendente,
+            valortotalpendente: parcelas.valortotalpendente,
+            datafimmov: dataFimMov,
+            indativo: indativo, 
+        },
+    );
+}
     async finalizar(
-        codMovimentacao: number,
+        codMovimentacao: number | string | bigint,
     ) {
         return this.repository.update(
             codMovimentacao,
@@ -166,19 +118,12 @@ export class MovimentacaoService {
     }
 
     async findById(
-        codMovimentacao: number,
+        codMovimentacao: number | string | bigint,
     ) {
-        return this.repository.findById(
-            codMovimentacao,
-        )
+        return this.repository.findById(codMovimentacao)
     }
 
-    // async findAll() {
-    //     return this.repository.findAll()
-    // }
-// Atualizado para receber os filtros e paginação obrigatórios
     async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }) {
-        // Garante valores padrão caso venham indefinidos
         const page = Number(params.page ?? 0);
         const size = Number(params.size ?? 10);
 
@@ -188,22 +133,25 @@ export class MovimentacaoService {
             size
         });
     }
-    async delete(
-        codMovimentacao: number,
-    ) {
-        return this.repository.delete(
-            codMovimentacao,
-        )
-    }
 
-async findAllView() {
-    const result =
-        await this.repository.findAllView()
-  return result
-    // return result.map(item => ({
-    //     ...item,
-    //     codmovimentacao:
-    //         Number(item.desccategoria),
-    // }))
+  async delete(
+        codMovimentacao: number | string | bigint,
+    ) {
+        try {
+            console.log(codMovimentacao)
+            return await this.repository.delete(codMovimentacao);
+        } catch (error: any) {
+            if (error.code === 'P2025') {
+                return null; 
+            }
+            
+            throw error;
+        }
+    }
+    
+
+    async findAllView() {
+        return await this.repository.findAllView()
+    }
 }
-}
+

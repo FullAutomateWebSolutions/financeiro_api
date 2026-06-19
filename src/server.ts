@@ -9,6 +9,7 @@ import { cartaoRoutes } from "./modules/cartao/cartao.routes";
 import { contaRoutes } from "./modules/conta/conta.routes";
 import { formaPagamentoRoute } from "./modules/forma-pagamento/formaPagamento.routes";
 import { movimentacaoRoutes } from "./modules/movimentacao/movimentacao.routes";
+import { statusRouter } from "./modules/status/status.routes";
 
 const app = fastify({
   logger: true,
@@ -80,6 +81,9 @@ async function start() {
       prefix: "/categoria",
     });
 
+      await app.register(statusRouter, {
+      prefix: "/status",
+    });
     await app.register(cartaoRoutes, {
       prefix: "/cartao",
     });

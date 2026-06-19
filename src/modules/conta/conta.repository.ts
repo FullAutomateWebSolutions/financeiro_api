@@ -3,6 +3,9 @@ import {BaseRepository} from '../shared/base/BaseRepository';
 
 export class ContaRepository  extends BaseRepository<any>{
     constructor() {
-        super(new BaseRepository(prisma.conta))
+          super(prisma.conta)
+    }
+    findAllA(): Promise<any> {
+        return prisma.conta.findMany()
     }
 }

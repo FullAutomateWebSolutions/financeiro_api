@@ -1,13 +1,13 @@
 import { FastifyInstance } from "fastify"
-import { CategoriaController } from "./categoria.controller"
-import { CategoriaRepository } from "./categoria.repository"
-import { CategoriaService } from "./categoria.service"
-
-export async function categoriaRoutes(app : FastifyInstance) {
-  const repository = new CategoriaRepository()
-  const service = new CategoriaService(repository)
-  const controller = new CategoriaController(service)
-
-  app.get('/', controller.findAll.bind(controller))
-  app.post('/', controller.create.bind(controller))
+import {CategoriaController} from './categoria.controller';
+import {CategoriaService } from './categoria.service';
+export async function categoriaRoutes(
+  app: FastifyInstance,
+) {
+  const controller = new CategoriaController()
+        app.get( '/', controller.findAll)
+        app.get('/:id',controller.findById)
+        app.post( '/',  controller.create)
+        app.put( '/:id',  controller.update)
+        app.delete('/:id',controller.delete)
 }

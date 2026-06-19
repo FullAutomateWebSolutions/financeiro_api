@@ -9,14 +9,14 @@ export const createMovimentacaoSchema = z
       .min(3, 'Descrição deve possuir no mínimo 3 caracteres')
       .max(255, 'Descrição deve possuir no máximo 255 caracteres'),
 
-    // valorunit: z
-    //   .number()
-    //   .positive('Valor unitário deve ser maior que zero'),
+    valorunit: z.coerce
+      .number({ required_error: 'Valor unitário é obrigatório' })
+      .min(0, 'Valor unitário não pode ser negativo'),
 
-    // porcjuros: z
-    //   .number()
-    //   .min(0, 'Percentual de juros não pode ser negativo')
-    //   .default(0),
+    porcjuros: z.coerce
+      .number()
+      .min(0, 'Percentual de juros não pode ser negativo')
+      .default(0),
 
     tipoparcelamento: z
       .number()
@@ -29,39 +29,39 @@ export const createMovimentacaoSchema = z
         },
       ),
 
-    qtdparcatual: z
+    qtdparcatual: z.coerce
       .number()
       .int()
       .min(1)
       .default(1),
 
-    qtdparcfinal: z
+    qtdparcfinal: z.coerce
       .number()
       .int()
       .min(1)
       .default(1),
 
-    codformpag: z
+    codformpag: z.coerce
       .number()
       .int()
       .positive(),
 
-    codconta: z
+    codconta: z.coerce
       .number()
       .int()
       .positive(),
 
-    codstatus: z
+    codstatus: z.coerce
       .number()
       .int()
       .positive(),
 
-    codcategoria: z
+    codcategoria: z.coerce
       .number()
       .int()
       .positive(),
 
-    codcartao: z
+    codcartao: z.coerce
       .number()
       .int()
       .positive()
@@ -85,5 +85,4 @@ export const createMovimentacaoSchema = z
     },
   )
 
-export type CreateMovimentacaoDTO =
-  z.infer<typeof createMovimentacaoSchema>
+export type CreateMovimentacaoDTO = z.infer<typeof createMovimentacaoSchema>

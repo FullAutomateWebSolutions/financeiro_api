@@ -1,24 +1,16 @@
-import { CategoriaService } from "./categoria.service";
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import {BaseController} from '../shared/base/BaseController';
+import {CategoriaService} from './categoria.service';
+export class CategoriaController extends BaseController
+{
+  constructor(
+    private categoriaService = new CategoriaService(),
+  ) {
+    super(categoriaService)
+  }
 
-export class CategoriaController {
-    constructor(
-        private service: CategoriaService,
-    ) { }
-
-    async create(
-        req: FastifyRequest, reply: FastifyReply
-    ) {
-        const result = await this.service.create(req.body)
-
-        return reply.send(result)
-    }
-
-    async findAll(request: FastifyRequest<{ Body: CategoriaService }>,
-        reply: FastifyReply,
-    ) {
-        const result = await this.service.findAll()
-
-        return reply.send(result)
-    }
+  buscarAtivas = async ( req: FastifyRequest, reply: FastifyReply ) => {
+    const result = await this.categoriaService.findAll()
+    return reply.send(result)
+  }
 }

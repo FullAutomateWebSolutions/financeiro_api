@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-    schemas  = ["gestao"]
+  schemas  = ["gestao"]
 }
 
 model cartao {
@@ -16,7 +16,8 @@ model cartao {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
-    @@schema("gestao")
+
+  @@schema("gestao")
 }
 
 model categoria {
@@ -27,7 +28,8 @@ model categoria {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
-      @@schema("gestao")
+
+  @@schema("gestao")
 }
 
 model conta {
@@ -39,7 +41,8 @@ model conta {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
-      @@schema("gestao")
+
+  @@schema("gestao")
 }
 
 model formapagamento {
@@ -51,7 +54,8 @@ model formapagamento {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
-      @@schema("gestao")
+
+  @@schema("gestao")
 }
 
 model movimentacao {
@@ -89,7 +93,7 @@ model movimentacao {
   @@index([codconta], map: "idx_mov_conta")
   @@index([datamov], map: "idx_mov_data")
   @@index([codstatus], map: "idx_mov_status")
-      @@schema("gestao")
+  @@schema("gestao")
 }
 
 model movimentacaohist {
@@ -119,9 +123,10 @@ model movimentacaohist {
   categoria           categoria?      @relation(fields: [codcategoria], references: [codcategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_categoria")
   conta               conta?          @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_conta")
   formapagamento      formapagamento? @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_formapag")
-  movimentacao        movimentacao?   @relation(fields: [codmovimentacao], references: [codmovimentacao], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_mov")
+  movimentacao        movimentacao?   @relation(fields: [codmovimentacao], references: [codmovimentacao], onUpdate: NoAction, map: "fk_hist_mov")
   status              status?         @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_status")
-    @@schema("gestao")
+
+  @@schema("gestao")
 }
 
 model status {
@@ -133,5 +138,6 @@ model status {
   dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
-      @@schema("gestao")
+
+  @@schema("gestao")
 }

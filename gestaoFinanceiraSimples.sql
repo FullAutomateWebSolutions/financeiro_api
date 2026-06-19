@@ -1,8 +1,6 @@
 -- ==========================================================
 -- BANCO DE DADOS FINANCEIRO
--- PostgreSQL
--- Script Único
--- Criação de tabelas + relacionamentos + dados de teste
+-- PostgreSQL - Versão Padronizada para Prisma ORM
 -- ==========================================================
 
 BEGIN;
@@ -20,24 +18,18 @@ SET search_path TO gestao;
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS gestao.status (
-    codStatus INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    descStatus VARCHAR(100) NOT NULL,
-    descCompleta VARCHAR(255),
-    indAtivo BOOLEAN DEFAULT TRUE,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    codstatus INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    descstatus VARCHAR(100) NOT NULL,
+    desccompleta VARCHAR(255),
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO status
-(descStatus, descCompleta, indAtivo)
-SELECT
-    'ABERTO',
-    'Movimento em aberto',
-    TRUE
+INSERT INTO gestao.status (descstatus, desccompleta, indativo)
+SELECT 'ABERTO', 'Movimento em aberto', TRUE
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM gestao.status
-    WHERE descStatus = 'ABERTO'
+    SELECT 1 FROM gestao.status WHERE descstatus = 'ABERTO'
 );
 
 -- ==========================================================
@@ -45,49 +37,37 @@ WHERE NOT EXISTS (
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS gestao.conta (
-    codConta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tipoConta TEXT NOT NULL,
-    descConta TEXT NOT NULL,
-    indAtivo BOOLEAN DEFAULT TRUE,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    codconta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tipoconta TEXT NOT NULL,
+    descconta TEXT NOT NULL,
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO gestao.conta
-(tipoConta, descConta, indAtivo)
-SELECT
-    'CORRENTE',
-    'Conta Principal',
-    TRUE
+INSERT INTO gestao.conta (tipoconta, descconta, indativo)
+SELECT 'CORRENTE', 'Conta Principal', TRUE
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM gestao.conta
-    WHERE descConta = 'Conta Principal'
+    SELECT 1 FROM gestao.conta WHERE descconta = 'Conta Principal'
 );
 
 -- ==========================================================
 -- FORMA PAGAMENTO
 -- ==========================================================
 
-CREATE TABLE IF NOT EXISTS gestao.formaPagamento (
-    codFormPag INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tipoFormPag TEXT NOT NULL,
-    descFormPag TEXT NOT NULL,
-    indAtivo BOOLEAN DEFAULT TRUE,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS gestao.formapagamento (
+    codformpag INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tipoformpag TEXT NOT NULL,
+    descformpag TEXT NOT NULL,
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO gestao.formaPagamento
-(tipoFormPag, descFormPag, indAtivo)
-SELECT
-    'PIX',
-    'Pagamento PIX',
-    TRUE
+INSERT INTO gestao.formapagamento (tipoformpag, descformpag, indativo)
+SELECT 'PIX', 'Pagamento PIX', TRUE
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM gestao.formaPagamento
-    WHERE tipoFormPag = 'PIX'
+    SELECT 1 FROM gestao.formapagamento WHERE tipoformpag = 'PIX'
 );
 
 -- ==========================================================
@@ -95,24 +75,18 @@ WHERE NOT EXISTS (
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS gestao.cartao (
-    codCartao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tipoCartao TEXT NOT NULL,
-    descCartao TEXT NOT NULL,
-    indAtivo BOOLEAN DEFAULT TRUE,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    codcartao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tipocartao TEXT NOT NULL,
+    desccartao TEXT NOT NULL,
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO gestao.cartao
-(tipoCartao, descCartao, indAtivo)
-SELECT
-    'CREDITO',
-    'Cartão Principal',
-    TRUE
+INSERT INTO gestao.cartao (tipocartao, desccartao, indativo)
+SELECT 'CREDITO', 'Cartão Principal', TRUE
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM gestao.cartao
-    WHERE descCartao = 'Cartão Principal'
+    SELECT 1 FROM gestao.cartao WHERE desccartao = 'Cartão Principal'
 );
 
 -- ==========================================================
@@ -120,22 +94,17 @@ WHERE NOT EXISTS (
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS gestao.categoria (
-    codCategoria INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    descCategoria TEXT NOT NULL,
-    indAtivo BOOLEAN DEFAULT TRUE,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    codcategoria INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    desccategoria TEXT NOT NULL,
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO gestao.categoria
-(descCategoria, indAtivo)
-SELECT
-    'ALIMENTACAO',
-    TRUE
+INSERT INTO gestao.categoria (desccategoria, indativo)
+SELECT 'ALIMENTACAO', TRUE
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM gestao.categoria
-    WHERE descCategoria = 'ALIMENTACAO'
+    SELECT 1 FROM gestao.categoria WHERE desccategoria = 'ALIMENTACAO'
 );
 
 -- ==========================================================
@@ -143,166 +112,84 @@ WHERE NOT EXISTS (
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS gestao.movimentacao (
-    codMovimentacao BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codmovimentacao BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    datamov TIMESTAMP NOT NULL,
+    descmovimento TEXT NOT NULL,
+    valorunit NUMERIC(12,2) NOT NULL,
+    porcjuros NUMERIC(12,2) DEFAULT 0,
+    valorjuros NUMERIC(12,2) DEFAULT 0,
+    tipoparcelamento INTEGER,
+    qtdparcatual INTEGER,
+    qtdparcfinal INTEGER,
+    qtdparcpendente INTEGER,
+    valortotalpendente NUMERIC(12,2),
+    datafimmov TIMESTAMP,
+    codformpag INTEGER NOT NULL,
+    codconta INTEGER NOT NULL,
+    codstatus INTEGER NOT NULL,
+    codcategoria INTEGER NOT NULL,
+    codcartao INTEGER,
+    indativo BOOLEAN DEFAULT TRUE,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataatualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dataintegracao TIMESTAMP,
+    datafechamento TIMESTAMP,
 
-    dataMov TIMESTAMP NOT NULL,
-
-    descMovimento TEXT NOT NULL,
-
-    valorUnit NUMERIC(12,2) NOT NULL,
-
-    porcJuros NUMERIC(12,2) DEFAULT 0,
-
-    valorJuros NUMERIC(12,2) DEFAULT 0,
-
-    tipoParcelamento INTEGER,
-
-    qtdParcAtual INTEGER,
-
-    qtdParcFinal INTEGER,
-
-    qtdParcPendente INTEGER,
-
-    valorTotalPendente NUMERIC(12,2),
-
-    dataFimMov TIMESTAMP,
-
-    codFormPag INTEGER NOT NULL,
-
-    codConta INTEGER NOT NULL,
-
-    codStatus INTEGER NOT NULL,
-
-    codCategoria INTEGER NOT NULL,
-
-    codCartao INTEGER,
-
-    indAtivo BOOLEAN DEFAULT TRUE,
-
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    dataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    dataIntegracao TIMESTAMP,
-
-    dataFechamento TIMESTAMP,
-
-    CONSTRAINT fk_mov_formapag
-        FOREIGN KEY (codFormPag)
-        REFERENCES gestao.formaPagamento(codFormPag),
-
-    CONSTRAINT fk_mov_conta
-        FOREIGN KEY (codConta)
-        REFERENCES gestao.conta(codConta),
-
-    CONSTRAINT fk_mov_status
-        FOREIGN KEY (codStatus)
-        REFERENCES gestao.status(codStatus),
-
-    CONSTRAINT fk_mov_categoria
-        FOREIGN KEY (codCategoria)
-        REFERENCES gestao.categoria(codCategoria),
-
-    CONSTRAINT fk_mov_cartao
-        FOREIGN KEY (codCartao)
-        REFERENCES gestao.cartao(codCartao)
+    CONSTRAINT fk_mov_formapag FOREIGN KEY (codformpag) REFERENCES gestao.formapagamento(codformpag),
+    CONSTRAINT fk_mov_conta FOREIGN KEY (codconta) REFERENCES gestao.conta(codconta),
+    CONSTRAINT fk_mov_status FOREIGN KEY (codstatus) REFERENCES gestao.status(codstatus),
+    CONSTRAINT fk_mov_categoria FOREIGN KEY (codcategoria) REFERENCES gestao.categoria(codcategoria),
+    CONSTRAINT fk_mov_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao)
 );
 
 -- ==========================================================
 -- MOVIMENTACAO HISTORICO
 -- ==========================================================
 
-CREATE TABLE IF NOT EXISTS gestao.movimentacaoHist (
-    codMovimentacaoHist BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS gestao.movimentacaohist (
+    codmovimentacaohist BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codmovimentacao BIGINT,
+    datamov TIMESTAMP,
+    descmovimento TEXT,
+    valorunit NUMERIC(12,2),
+    tipoparcelamento INTEGER,
+    qtdparcatual INTEGER,
+    qtdparcfinal INTEGER,
+    qtdparcpendente INTEGER,
+    valortotalpendente NUMERIC(12,2),
+    datafimmov TIMESTAMP,
+    codformpag INTEGER,
+    codconta INTEGER,
+    codstatus INTEGER,
+    codcategoria INTEGER,
+    codcartao INTEGER,
+    indativo BOOLEAN,
+    datacriacao TIMESTAMP,
+    dataatualizacao TIMESTAMP,
+    dataintegracao TIMESTAMP,
+    datafechamento TIMESTAMP,
+    datahistorico TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    codMovimentacao BIGINT,
-
-    dataMov TIMESTAMP,
-
-    descMovimento TEXT,
-
-    valorUnit NUMERIC(12,2),
-
-    tipoParcelamento INTEGER,
-
-    qtdParcAtual INTEGER,
-
-    qtdParcFinal INTEGER,
-
-    qtdParcPendente INTEGER,
-
-    valorTotalPendente NUMERIC(12,2),
-
-    dataFimMov TIMESTAMP,
-
-    codFormPag INTEGER,
-
-    codConta INTEGER,
-
-    codStatus INTEGER,
-
-    codCategoria INTEGER,
-
-    codCartao INTEGER,
-
-    indAtivo BOOLEAN,
-
-    dataCriacao TIMESTAMP,
-
-    dataAtualizacao TIMESTAMP,
-
-    dataIntegracao TIMESTAMP,
-
-    dataFechamento TIMESTAMP,
-
-    dataHistorico TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_hist_mov
-        FOREIGN KEY (codMovimentacao)
-        REFERENCES gestao.movimentacao(codMovimentacao),
-
-    CONSTRAINT fk_hist_formapag
-        FOREIGN KEY (codFormPag)
-        REFERENCES gestao.formaPagamento(codFormPag),
-
-    CONSTRAINT fk_hist_conta
-        FOREIGN KEY (codConta)
-        REFERENCES gestao.conta(codConta),
-
-    CONSTRAINT fk_hist_status
-        FOREIGN KEY (codStatus)
-        REFERENCES gestao.status(codStatus),
-
-    CONSTRAINT fk_hist_categoria
-        FOREIGN KEY (codCategoria)
-        REFERENCES gestao.categoria(codCategoria),
-
-    CONSTRAINT fk_hist_cartao
-        FOREIGN KEY (codCartao)
-        REFERENCES gestao.cartao(codCartao)
+    CONSTRAINT fk_hist_mov FOREIGN KEY (codmovimentacao) REFERENCES gestao.movimentacao(codmovimentacao) ON DELETE SET NULL,
+    CONSTRAINT fk_hist_formapag FOREIGN KEY (codformpag) REFERENCES gestao.formapagamento(codformpag),
+    CONSTRAINT fk_hist_conta FOREIGN KEY (codconta) REFERENCES gestao.conta(codconta),
+    CONSTRAINT fk_hist_status FOREIGN KEY (codstatus) REFERENCES gestao.status(codstatus),
+    CONSTRAINT fk_hist_categoria FOREIGN KEY (codcategoria) REFERENCES gestao.categoria(codcategoria),
+    CONSTRAINT fk_hist_cartao FOREIGN KEY (codcartao) REFERENCES gestao.cartao(codcartao)
 );
 
 -- ==========================================================
 -- ÍNDICES
 -- ==========================================================
 
-CREATE INDEX IF NOT EXISTS idx_mov_status
-ON gestao.movimentacao(codStatus);
-
-CREATE INDEX IF NOT EXISTS idx_mov_conta
-ON gestao.movimentacao(codConta);
-
-CREATE INDEX IF NOT EXISTS idx_mov_categoria
-ON gestao.movimentacao(codCategoria);
-
-CREATE INDEX IF NOT EXISTS idx_mov_cartao
-ON gestao.movimentacao(codCartao);
-
-CREATE INDEX IF NOT EXISTS idx_mov_data
-ON gestao.movimentacao(dataMov);
+CREATE INDEX IF NOT EXISTS idx_mov_status ON gestao.movimentacao(codstatus);
+CREATE INDEX IF NOT EXISTS idx_mov_conta ON gestao.movimentacao(codconta);
+CREATE INDEX IF NOT EXISTS idx_mov_categoria ON gestao.movimentacao(codcategoria);
+CREATE INDEX IF NOT EXISTS idx_mov_cartao ON gestao.movimentacao(codcartao);
+CREATE INDEX IF NOT EXISTS idx_mov_data ON gestao.movimentacao(datamov);
 
 -- ==========================================================
--- TRIGGER HISTÓRICO
+-- FUNÇÕES DO BANCO DE DADOS
 -- ==========================================================
 
 CREATE OR REPLACE FUNCTION gestao.fn_data_atualizacao()
@@ -311,104 +198,85 @@ LANGUAGE plpgsql
 AS
 $$
 BEGIN
-    NEW.dataAtualizacao := CURRENT_TIMESTAMP;
+    NEW.dataatualizacao := CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $$;
 
+-- FUNÇÃO REESTRUTURADA: Captura o estado anterior (OLD) e retorna o estado modificado de forma segura para o ORM
+CREATE OR REPLACE FUNCTION gestao.fn_movimentacao_hist()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS
+$$
+BEGIN
+    -- Armazena o registro original completo na tabela de logs/histórico
+    INSERT INTO gestao.movimentacaohist
+    (
+        codmovimentacao, datamov, descmovimento, valorunit,
+        tipoparcelamento, qtdparcatual, qtdparcfinal, qtdparcpendente,
+        valortotalpendente, datafimmov, codformpag, codconta,
+        codstatus, codcategoria, codcartao, indativo,
+        datacriacao, dataatualizacao, dataintegracao, datafechamento
+    )
+    VALUES
+    (
+        OLD.codmovimentacao, OLD.datamov, OLD.descmovimento, OLD.valorunit,
+        OLD.tipoparcelamento, OLD.qtdparcatual, OLD.qtdparcfinal, OLD.qtdparcpendente,
+        OLD.valortotalpendente, OLD.datafimmov, OLD.codformpag, OLD.codconta,
+        OLD.codstatus, OLD.codcategoria, OLD.codcartao, OLD.indativo,
+        OLD.datacriacao, OLD.dataatualizacao, OLD.dataintegracao, OLD.datafechamento
+    );
+
+    -- Determina o retorno apropriado baseado no tipo de operação interceptada
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+
+    -- Em operações BEFORE UPDATE, retornar NEW permite a alteração e mantém compatibilidade com consultas RETURNING do Prisma
+    RETURN NEW;
+END;
+$$;
+
+-- ==========================================================
+-- GATILHOS (TRIGGERS)
+-- ==========================================================
+
+DROP TRIGGER IF EXISTS trg_data_atualizacao_mov ON gestao.movimentacao;
 CREATE TRIGGER trg_data_atualizacao_mov
 BEFORE UPDATE
 ON gestao.movimentacao
 FOR EACH ROW
 EXECUTE FUNCTION gestao.fn_data_atualizacao();
 
-----Se alguém apagar uma movimentação, o histórico é perdido.
+DROP TRIGGER IF EXISTS trg_movimentacao_hist_delete ON gestao.movimentacao;
 CREATE TRIGGER trg_movimentacao_hist_delete
 BEFORE DELETE
 ON gestao.movimentacao
 FOR EACH ROW
 EXECUTE FUNCTION gestao.fn_movimentacao_hist();
 
-
---Views para dashboard
-CREATE VIEW gestao.vw_resumo_financeiro AS
-SELECT
-    c.desccategoria,
-    SUM(m.valorunit) valor_total,
-    COUNT(*) quantidade
-FROM gestao.movimentacao m
-INNER JOIN gestao.categoria c
-    ON c.codcategoria = m.codcategoria
-GROUP BY c.desccategoria;
-
-
-CREATE OR REPLACE FUNCTION fn_movimentacao_hist()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS
-$$
-BEGIN
-
-    INSERT INTO gestao.movimentacaoHist
-    (
-        codMovimentacao,
-        dataMov,
-        descMovimento,
-        valorUnit,
-        tipoParcelamento,
-        qtdParcAtual,
-        qtdParcFinal,
-        qtdParcPendente,
-        valorTotalPendente,
-        dataFimMov,
-        codFormPag,
-        codConta,
-        codStatus,
-        codCategoria,
-        codCartao,
-        indAtivo,
-        dataCriacao,
-        dataAtualizacao,
-        dataIntegracao,
-        dataFechamento
-    )
-    VALUES
-    (
-        OLD.codMovimentacao,
-        OLD.dataMov,
-        OLD.descMovimento,
-        OLD.valorUnit,
-        OLD.tipoParcelamento,
-        OLD.qtdParcAtual,
-        OLD.qtdParcFinal,
-        OLD.qtdParcPendente,
-        OLD.valorTotalPendente,
-        OLD.dataFimMov,
-        OLD.codFormPag,
-        OLD.codConta,
-        OLD.codStatus,
-        OLD.codCategoria,
-        OLD.codCartao,
-        OLD.indAtivo,
-        OLD.dataCriacao,
-        OLD.dataAtualizacao,
-        OLD.dataIntegracao,
-        OLD.dataFechamento
-    );
-
-    RETURN NEW;
-
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_movimentacao_hist
-ON gestao.movimentacao;
-
+-- ALTERADO PARA BEFORE: Garante o fluxo de dados nativo do banco e impede Rollbacks lógicos no Prisma Client
+DROP TRIGGER IF EXISTS trg_movimentacao_hist ON gestao.movimentacao;
 CREATE TRIGGER trg_movimentacao_hist
 BEFORE UPDATE
 ON gestao.movimentacao
 FOR EACH ROW
-EXECUTE FUNCTION fn_movimentacao_hist();
+EXECUTE FUNCTION gestao.fn_movimentacao_hist();
+
+-- ==========================================================
+-- VIEWS
+-- ==========================================================
+
+DROP VIEW IF EXISTS gestao.vw_resumo_financeiro;
+CREATE VIEW gestao.vw_resumo_financeiro AS
+SELECT
+    c.desccategoria,
+    SUM(m.valorunit) AS valor_total,
+    COUNT(*) AS quantidade
+FROM gestao.movimentacao m
+INNER JOIN gestao.categoria c ON c.codcategoria = m.codcategoria
+GROUP BY c.desccategoria;
 
 -- ==========================================================
 -- DADOS TESTE MOVIMENTAÇÃO
@@ -416,47 +284,22 @@ EXECUTE FUNCTION fn_movimentacao_hist();
 
 INSERT INTO gestao.movimentacao
 (
-    dataMov,
-    descMovimento,
-    valorUnit,
-    porcJuros,
-    valorJuros,
-    tipoParcelamento,
-    qtdParcAtual,
-    qtdParcFinal,
-    qtdParcPendente,
-    valorTotalPendente,
-    dataFimMov,
-    codFormPag,
-    codConta,
-    codStatus,
-    codCategoria,
-    codCartao,
-    indAtivo
+    datamov, descmovimento, valorunit, porcjuros, valorjuros,
+    tipoparcelamento, qtdparcatual, qtdparcfinal, qtdparcpendente,
+    valortotalpendente, datafimmov, codformpag, codconta,
+    codstatus, codcategoria, codcartao, indativo
 )
 SELECT
-    CURRENT_TIMESTAMP,
-    'Compra Mercado',
-    100.00,
-    5.00,
-    5.00,
-    1,
-    1,
-    10,
-    9,
-    945.00,
-    CURRENT_TIMESTAMP + INTERVAL '9 month',
-    (SELECT codFormPag FROM gestao.formaPagamento LIMIT 1),
-    (SELECT codConta FROM gestao.conta LIMIT 1),
-    (SELECT codStatus FROM gestao.status LIMIT 1),
-    (SELECT codCategoria FROM gestao.categoria LIMIT 1),
-    (SELECT codCartao FROM gestao.cartao LIMIT 1),
+    CURRENT_TIMESTAMP, 'Compra Mercado', 100.00, 5.00, 5.00,
+    1, 1, 10, 9, 945.00, CURRENT_TIMESTAMP + INTERVAL '9 month',
+    (SELECT codformpag FROM gestao.formapagamento LIMIT 1),
+    (SELECT codconta FROM gestao.conta LIMIT 1),
+    (SELECT codstatus FROM gestao.status LIMIT 1),
+    (SELECT codcategoria FROM gestao.categoria LIMIT 1),
+    (SELECT codcartao FROM gestao.cartao LIMIT 1),
     TRUE
-WHERE NOT EXISTS
-(
-    SELECT 1
-    FROM gestao.movimentacao
-    WHERE descMovimento = 'Compra Mercado'
+WHERE NOT EXISTS (
+    SELECT 1 FROM gestao.movimentacao WHERE descmovimento = 'Compra Mercado'
 );
 
 COMMIT;
@@ -467,9 +310,9 @@ COMMIT;
 
 SELECT 'STATUS' AS tabela, COUNT(*) registros FROM gestao.status
 UNION ALL
-SELECT 'CONTA', COUNT(*) FROM conta
+SELECT 'CONTA', COUNT(*) FROM gestao.conta
 UNION ALL
-SELECT 'FORMA_PAGAMENTO', COUNT(*) FROM gestao.formaPagamento
+SELECT 'FORMA_PAGAMENTO', COUNT(*) FROM gestao.formapagamento
 UNION ALL
 SELECT 'CARTAO', COUNT(*) FROM gestao.cartao
 UNION ALL
@@ -477,7 +320,4 @@ SELECT 'CATEGORIA', COUNT(*) FROM gestao.categoria
 UNION ALL
 SELECT 'MOVIMENTACAO', COUNT(*) FROM gestao.movimentacao
 UNION ALL
-SELECT 'MOVIMENTACAO_HIST', COUNT(*) FROM gestao.movimentacaoHist;
-
-
-
+SELECT 'MOVIMENTACAO_HIST', COUNT(*) FROM gestao.movimentacaohist;

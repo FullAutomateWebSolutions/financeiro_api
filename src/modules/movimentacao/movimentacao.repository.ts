@@ -1,141 +1,113 @@
-// movimentacao.repository.ts
-
 import { prisma } from '../../database/prisma'
-import { Client } from "pg";
+import { Prisma } from '@prisma/client'
+
 export class MovimentacaoRepository {
 
     async create(data: any) {
-  return prisma.movimentacao.create({
-    data: {
-      datamov: data.datamov,
-      descmovimento: data.descmovimento,
-      valorunit: data.valorunit,
-      porcjuros: data.porcjuros,
-      valorjuros: data.valorjuros,
-      tipoparcelamento: data.tipoparcelamento,
-      qtdparcatual: data.qtdparcatual,
-      qtdparcfinal: data.qtdparcfinal,
-      qtdparcpendente: data.qtdparcpendente,
-      valortotalpendente: data.valortotalpendente,
-      datafimmov: data.datafimmov,
-      indativo: data.indativo,
-      datacriacao: data.datacriacao,
-      dataatualizacao: data.dataatualizacao,
+        const valorunit = data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '' ? Number(data.valorunit) : 0;
+        const porcjuros = data.porcjuros !== undefined && data.porcjuros !== null && data.porcjuros !== '' ? Number(data.porcjuros) : 0;
+        const valorjuros = data.valorjuros !== undefined && data.valorjuros !== null && data.valorjuros !== '' ? Number(data.valorjuros) : 0;
+        const valortotalpendente = data.valortotalpendente !== undefined && data.valortotalpendente !== null && data.valortotalpendente !== '' ? Number(data.valortotalpendente) : 0;
 
-      categoria: {
-        connect: {
-          codcategoria: data.codcategoria,
-        },
-      },
+        return prisma.movimentacao.create({
+            data: {
+                datamov: data.datamov ? new Date(data.datamov) : new Date(),
+                descmovimento: data.descmovimento,
+                
+                valorunit: valorunit,
+                porcjuros: porcjuros,
+                valorjuros: valorjuros,
+                valortotalpendente: valortotalpendente,
+                
+                tipoparcelamento: data.tipoparcelamento !== undefined ? Number(data.tipoparcelamento) : null,
+                qtdparcatual: data.qtdparcatual !== undefined ? Number(data.qtdparcatual) : null,
+                qtdparcfinal: data.qtdparcfinal !== undefined ? Number(data.qtdparcfinal) : null,
+                qtdparcpendente: data.qtdparcpendente !== undefined ? Number(data.qtdparcpendente) : null,
+                datafimmov: data.datafimmov ? new Date(data.datafimmov) : null,
+                
+                indativo: data.indativo !== undefined ? Boolean(data.indativo) : true,
+                
+                datacriacao: data.datacriacao ? new Date(data.datacriacao) : new Date(),
+                dataatualizacao: data.dataatualizacao ? new Date(data.dataatualizacao) : new Date(),
 
-      conta: {
-        connect: {
-          codconta: data.codconta,
-        },
-      },
+                categoria: { connect: { codcategoria: Number(data.codcategoria) } },
+                conta: { connect: { codconta: Number(data.codconta) } },
+                status: { connect: { codstatus: Number(data.codstatus) } },
+                formapagamento: { connect: { codformpag: Number(data.codformpag) } },
 
-      status: {
-        connect: {
-          codstatus: data.codstatus,
-        },
-      },
-
-      formapagamento: {
-        connect: {
-          codformpag: data.codformpag,
-        },
-      },
-
-      ...(data.codcartao && {
-        cartao: {
-          connect: {
-            codcartao: data.codcartao,
-          },
-        },
-      }),
-    },
-  })
-}
-
-  async update(
-  codmovimentacao: number,
-  data: any,
-) {
-  return prisma.movimentacao.update({
-    where: {
-      codmovimentacao,
-    },
-    data: {
-      datamov: data.datamov,
-      descmovimento: data.descmovimento,
-      valorunit: data.valorunit,
-      porcjuros: data.porcjuros,
-      valorjuros: data.valorjuros,
-      tipoparcelamento: data.tipoparcelamento,
-      qtdparcatual: data.qtdparcatual,
-      qtdparcfinal: data.qtdparcfinal,
-      qtdparcpendente: data.qtdparcpendente,
-      valortotalpendente: data.valortotalpendente,
-      datafimmov: data.datafimmov,
-      indativo: data.indativo,
-      dataatualizacao: new Date(),
-
-      categoria: {
-        connect: {
-          codcategoria: data.codcategoria,
-        },
-      },
-
-      conta: {
-        connect: {
-          codconta: data.codconta,
-        },
-      },
-
-      status: {
-        connect: {
-          codstatus: data.codstatus,
-        },
-      },
-
-      formapagamento: {
-        connect: {
-          codformpag: data.codformpag,
-        },
-      },
-
-      ...(data.codcartao
-        ? {
-            cartao: {
-              connect: {
-                codcartao: data.codcartao,
-              },
-            },
-          }
-        : {
-            cartao: {
-              disconnect: true,
-            },
-          }),
-    },
-  })
-}
-    async delete(
-        codmovimentacao: number,
-    ) {
-        return prisma.movimentacao.delete({
-            where: {
-                codmovimentacao,
+                ...(data.codcartao && {
+                    cartao: { connect: { codcartao: Number(data.codcartao) } },
+                }),
             },
         })
     }
 
+    async update(
+        codmovimentacao: number | string | bigint,
+        data: any,
+    ) {
+        const idBigInt = BigInt(String(codmovimentacao).trim());
+
+        const valorunit = data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '' ? Number(data.valorunit) : undefined;
+        const porcjuros = data.porcjuros !== undefined && data.porcjuros !== null && data.porcjuros !== '' ? Number(data.porcjuros) : undefined;
+        const valorjuros = data.valorjuros !== undefined && data.valorjuros !== null && data.valorjuros !== '' ? Number(data.valorjuros) : undefined;
+        const valortotalpendente = data.valortotalpendente !== undefined && data.valortotalpendente !== null && data.valortotalpendente !== '' ? Number(data.valortotalpendente) : undefined;
+
+        return prisma.movimentacao.update({
+            where: {
+                codmovimentacao: idBigInt,
+            },
+            data: {
+                datamov: data.datamov ? new Date(data.datamov) : undefined,
+                datafimmov: data.datafimmov ? new Date(data.datafimmov) : undefined,
+                datafechamento: data.datafechamento ? new Date(data.datafechamento) : undefined,
+                dataintegracao: data.dataintegracao ? new Date(data.dataintegracao) : undefined,
+                dataatualizacao: new Date(),
+
+                descmovimento: data.descmovimento !== undefined ? data.descmovimento : undefined,
+                indativo: data.indativo !== undefined ? Boolean(data.indativo) : undefined,
+
+                valorunit: valorunit,
+                porcjuros: porcjuros,
+                valorjuros: valorjuros,
+                valortotalpendente: valortotalpendente,
+
+                tipoparcelamento: data.tipoparcelamento !== undefined && data.tipoparcelamento !== '' ? Number(data.tipoparcelamento) : undefined,
+                qtdparcatual: data.qtdparcatual !== undefined && data.qtdparcatual !== '' ? Number(data.qtdparcatual) : undefined,
+                qtdparcfinal: data.qtdparcfinal !== undefined && data.qtdparcfinal !== '' ? Number(data.qtdparcfinal) : undefined,
+                qtdparcpendente: data.qtdparcpendente !== undefined && data.qtdparcpendente !== '' ? Number(data.qtdparcpendente) : undefined,
+
+                ...(data.codcategoria && { categoria: { connect: { codcategoria: Number(data.codcategoria) } } }),
+                ...(data.codconta && { conta: { connect: { codconta: Number(data.codconta) } } }),
+                ...(data.codstatus && { status: { connect: { codstatus: Number(data.codstatus) } } }),
+                ...(data.codformpag && { formapagamento: { connect: { codformpag: Number(data.codformpag) } } }),
+
+                ...(data.codcartao !== undefined
+                    ? data.codcartao
+                        ? { cartao: { connect: { codcartao: Number(data.codcartao) } } }
+                        : { cartao: { disconnect: true } }
+                    : {}),
+            },
+        });
+    }
+
+    async delete(
+        codmovimentacao: number | string | bigint,
+    ) {
+        const idBigInt = BigInt(String(codmovimentacao).trim());
+        return prisma.movimentacao.delete({
+            where: {
+                codmovimentacao: idBigInt,
+            },
+        });
+    }
+
     async findById(
-        codmovimentacao: number,
+        codmovimentacao: number | string | bigint,
     ) {
         return prisma.movimentacao.findUnique({
             where: {
-                codmovimentacao,
+                codmovimentacao: BigInt(String(codmovimentacao).trim()),
             },
             include: {
                 categoria: true,
@@ -148,84 +120,55 @@ export class MovimentacaoRepository {
     }
 
     async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }) {
-    const { page, size, sort, descmovimento, codcategoria, codconta } = params;
+        const { page, size, sort, descmovimento, codcategoria, codconta } = params;
 
-    // 1. Monta as condições de filtro (where) se existirem
-    const where: any = {};
-    if (descmovimento) {
-      where.descmovimento = { contains: descmovimento, mode: 'insensitive' };
+        const where: any = {};
+        if (descmovimento) {
+            where.descmovimento = { contains: descmovimento, mode: 'insensitive' };
+        }
+        if (codcategoria) where.codcategoria = Number(codcategoria);
+        if (codconta) where.codconta = Number(codconta);
+
+        let orderBy: any = { datamov: 'desc' };
+        if (sort) {
+            const [field, order] = sort.split(',');
+            orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
+        }
+
+        const [content, totalElements] = await prisma.$transaction([
+            prisma.movimentacao.findMany({
+                where,
+                include: {
+                    categoria: true,
+                    conta: true,
+                    cartao: true,
+                    status: true,
+                    formapagamento: true,
+                },
+                orderBy,
+                skip: page * size,
+                take: size,
+            }),
+            prisma.movimentacao.count({ where })
+        ]);
+
+        const totalPages = Math.ceil(totalElements / size);
+
+        return {
+            content,
+            page,
+            size,
+            totalElements,
+            totalPages,
+            firstPage: page === 0,
+            lastPage: page >= totalPages - 1 || totalPages === 0
+        };
     }
-    if (codcategoria) where.codcategoria = codcategoria;
-    if (codconta) where.codconta = codconta;
 
-    // 2. Monta a ordenação baseada na string "campo,asc" ou "campo,desc"
-    let orderBy: any = { datamov: 'desc' }; // Padrão
-    if (sort) {
-      const [field, order] = sort.split(',');
-      orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
+    async findAllView(): Promise<any[]> {
+        return prisma.$queryRaw`
+            SELECT *
+            FROM gestao.vw_resumo_financeiro
+        `
     }
-
-    // 3. Executa a busca paginada e a contagem total concorrentemente
-    const [content, totalElements] = await prisma.$transaction([
-      prisma.movimentacao.findMany({
-        where,
-        include: {
-          categoria: true,
-          conta: true,
-          cartao: true,
-          status: true,
-          formapagamento: true,
-        },
-        orderBy,
-        skip: page * size, // Pula os registros das páginas anteriores
-        take: size,        // Limita a quantidade de registros retornados
-      }),
-      prisma.movimentacao.count({ where })
-    ]);
-
-    // Retorna a estrutura necessária calculando as páginas
-    const totalPages = Math.ceil(totalElements / size);
-
-    return {
-      content,
-      page,
-      size,
-      totalElements,
-      totalPages,
-      firstPage: page === 0,
-      lastPage: page >= totalPages - 1 || totalPages === 0
-    };
-  }
-    // async findAll() {
-    //     return prisma.movimentacao.findMany({
-    //         include: {
-    //             categoria: true,
-    //             conta: true,
-    //             cartao: true,
-    //             status: true,
-    //             formapagamento: true,
-    //         },
-    //         orderBy: {
-    //             datamov: 'desc',
-    //         },
-    //     })
-    // }
-
-async findAllView(): Promise<MovimentacaoView[]> {
-    return prisma.$queryRaw<MovimentacaoView[]>`
-        SELECT *
-        FROM gestao.vw_resumo_financeiro
-    `
-}
-
-}
-// desccategoria	valor_total	quantidade
-export interface MovimentacaoView {
-    // codmovimentacao: bigint
-    // descmovimento: string
-    // valorunit: number
-    valor_total: number
-    quantidade: number
-    desccategoria: string
-    // descstatus: string
 }
