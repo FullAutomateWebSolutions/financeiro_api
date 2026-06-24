@@ -4,36 +4,40 @@ export class BaseService {
     protected primaryKey: string,
   ) {}
 
-  async findAll() {
-    return this.repository.findAll()
+  async findAll(codUsuario: number) {
+    return this.repository.findAll(codUsuario)
   }
 
-  async findById(id: number) {
+  async findById(id: number, codUsuario: number) {
     return this.repository.findById(
       id,
       this.primaryKey,
+      codUsuario,
     )
   }
 
-  async create(data: any) {
-    return this.repository.create(data)
+  async create(data: any, codUsuario: number) {
+    return this.repository.create(data, codUsuario)
   }
 
   async update(
     id: number,
     data: any,
+    codUsuario: number,
   ) {
     return this.repository.update(
       id,
       this.primaryKey,
       data,
+      codUsuario,
     )
   }
 
-  async delete(id: number) {
+  async delete(id: number, codUsuario: number) {
     return this.repository.delete(
       id,
       this.primaryKey,
+      codUsuario,
     )
   }
 }

@@ -31,7 +31,7 @@ export class UsuarioController extends BaseController {
             throw new Error('JWT_SECRET não está definido nas variáveis de ambiente.');
         }
 
-        const decoded = jwt.verify(token, secretKey) as { role: string; codusuario: number; email: string };
+        const decoded = jwt.verify(token, secretKey) as { role: string; codUsuario: number; email: string };
 
         if (decoded.role !== 'ADMIN') {
             reply.status(403).send({ 

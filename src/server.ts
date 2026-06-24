@@ -16,7 +16,10 @@ import { usuarioRoutes } from "./modules/usuario/usuarioRoutes";
 import { startMovimentacaoCron } from './modules/movimentacao/movimentacao.cron';
 
 const app = fastify({
-  logger: true,
+  // logger: false,
+  logger: {
+    level: 'info'
+  },
   bodyLimit: 1024 * 1024,
   pluginTimeout: 120000,
 });
@@ -67,10 +70,10 @@ app.setErrorHandler(
 async function start() {
   try {
     //  REGISTRAR O CORS PRIMEIRO (Evita bloqueios no navegador)
-    await app.register(cors, {
-      origin: "*", 
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    });
+await app.register(cors, {
+  origin: ["http://localhost:3000", "http://localhost:5173" , "http://localhost:3015" ,"http://163.176.246.55:3000/"], 
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+});
 
     //  CONFIGURAR O @FASTIFY/JWT ( ESSENCIAL: DEVE VIR ANTES DAS ROTAS!)
     await app.register(fastifyJwt, {
@@ -146,6 +149,7 @@ async function start() {
       host: "0.0.0.0",
       port,
     });
+
     startMovimentacaoCron();
     console.log(` Server running on http://localhost:${port}`);
     console.log(` Swagger available at http://localhost:${port}/docs`);

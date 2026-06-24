@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import {BaseController} from '../shared/base/BaseController';
 import {CategoriaService} from './categoria.service';
+import { autenticarUsuario } from '../shared/utils/autenticarUsuario';
 export class CategoriaController extends BaseController
 {
   constructor(
@@ -10,7 +11,9 @@ export class CategoriaController extends BaseController
   }
 
   buscarAtivas = async ( req: FastifyRequest, reply: FastifyReply ) => {
-    const result = await this.categoriaService.findAll()
+          // const body = created.parse(req.body);
+    const usuario = await autenticarUsuario(req, reply);
+    const result = await this.categoriaService.findAll(usuario?.codUsuario as number)
     return reply.send(result)
   }
 }

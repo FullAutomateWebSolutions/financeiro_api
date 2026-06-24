@@ -5,7 +5,7 @@ export class ContaService extends BaseService {
     private contaRepository = new ContaRepository();
 
     constructor() {
-        super(new ContaRepository(), 'codconta');
+        super(new ContaRepository(), 'codConta');
     }
 
     findAllA(): Promise<any> {

@@ -3,6 +3,6 @@ import { FormaPagamentoRepository } from "./formaPagamento.repository";
 
 export class FormaPagamentoService extends BaseService {
     constructor() {
-      super(new FormaPagamentoRepository , 'codformpag')  
+      super(new FormaPagamentoRepository , 'codFormPag')  
     }
 }

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 interface Decoded {
     role: string;
-    codusuario: number;
+    codUsuario: number;
     email: string;
 }
 

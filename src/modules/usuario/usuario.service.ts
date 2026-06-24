@@ -6,18 +6,18 @@ export class UsuarioService extends BaseService {
     private usuarioRepository =  new UsuarioRepository();
   
     constructor() {
-      super( new UsuarioRepository(), 'codusuario' )
+      super( new UsuarioRepository(), 'codUsuario' )
     }
 
     async listAllUsers() {
         return this.repository.findAll();
     }
 
-    async updateUser(codusuario: number, data: { nome?: string; email?: string; role?: usuario_role; indativo?: boolean }) {
-        return this.repository.updateUser(codusuario, data);
+    async updateUser(codUsuario: number, data: { nome?: string; email?: string; role?: usuario_role; indAtivo?: boolean }) {
+        return this.repository.updateUser(codUsuario, data);
     }
 
-    async deleteUser(codusuario: number) {
-        return this.repository.deleteUser(codusuario);
+    async deleteUser(codUsuario: number) {
+        return this.repository.deleteUser(codUsuario);
     }
 }

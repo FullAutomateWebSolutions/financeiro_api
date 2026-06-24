@@ -3,91 +3,91 @@ import { Prisma } from '@prisma/client'
 
 export class MovimentacaoRepository {
 
-    async create(data: any, codusuario: number) {
-        const valorunit = data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '' ? Number(data.valorunit) : 0;
-        const porcjuros = data.porcjuros !== undefined && data.porcjuros !== null && data.porcjuros !== '' ? Number(data.porcjuros) : 0;
-        const valorjuros = data.valorjuros !== undefined && data.valorjuros !== null && data.valorjuros !== '' ? Number(data.valorjuros) : 0;
-        const valortotalpendente = data.valortotalpendente !== undefined && data.valortotalpendente !== null && data.valortotalpendente !== '' ? Number(data.valortotalpendente) : 0;
+    async create(data: any, codUsuario: number) {
+        const valorUnit = data.valorUnit !== undefined && data.valorUnit !== null && data.valorUnit !== '' ? Number(data.valorUnit) : 0;
+        const porcJuros = data.porcJuros !== undefined && data.porcJuros !== null && data.porcJuros !== '' ? Number(data.porcJuros) : 0;
+        const valorJuros = data.valorJuros !== undefined && data.valorJuros !== null && data.valorJuros !== '' ? Number(data.valorJuros) : 0;
+        const valorTotalPendente = data.valorTotalPendente !== undefined && data.valorTotalPendente !== null && data.valorTotalPendente !== '' ? Number(data.valorTotalPendente) : 0;
 
         return prisma.movimentacao.create({
             data: {
-                datamov: data.datamov ? new Date(data.datamov) : new Date(),
-                descmovimento: data.descmovimento,
+                dataMov: data.dataMov ? new Date(data.dataMov) : new Date(),
+                descMovimento: data.descMovimento,
                 
-                valorunit: valorunit,
-                porcjuros: porcjuros,
-                valorjuros: valorjuros,
-                valortotalpendente: valortotalpendente,
+                valorUnit: valorUnit,
+                porcJuros: porcJuros,
+                valorJuros: valorJuros,
+                valorTotalPendente: valorTotalPendente,
                 
-                tipoparcelamento: data.tipoparcelamento !== undefined ? Number(data.tipoparcelamento) : null,
-                qtdparcatual: data.qtdparcatual !== undefined ? Number(data.qtdparcatual) : null,
-                qtdparcfinal: data.qtdparcfinal !== undefined ? Number(data.qtdparcfinal) : null,
-                qtdparcpendente: data.qtdparcpendente !== undefined ? Number(data.qtdparcpendente) : null,
-                datafimmov: data.datafimmov ? new Date(data.datafimmov) : null,
+                tipoParcelamento: data.tipoParcelamento !== undefined ? Number(data.tipoParcelamento) : null,
+                qtdParcAtual: data.qtdParcAtual !== undefined ? Number(data.qtdParcAtual) : null,
+                qtdParcFinal: data.qtdParcFinal !== undefined ? Number(data.qtdParcFinal) : null,
+                qtdParcPendente: data.qtdParcPendente !== undefined ? Number(data.qtdParcPendente) : null,
+                dataFimMov: data.dataFimMov ? new Date(data.dataFimMov) : null,
                 
-                indativo: data.indativo !== undefined ? Boolean(data.indativo) : true,
+                indAtivo: data.indAtivo !== undefined ? Boolean(data.indAtivo) : true,
                 
-                datacriacao: data.datacriacao ? new Date(data.datacriacao) : new Date(),
-                dataatualizacao: data.dataatualizacao ? new Date(data.dataatualizacao) : new Date(),
+                dataCriacao: data.dataCriacao ? new Date(data.dataCriacao) : new Date(),
+                dataAtualizacao: data.dataAtualizacao ? new Date(data.dataAtualizacao) : new Date(),
 
-                usuario: { connect: { codusuario: codusuario } },
-                categoria: { connect: { codcategoria: Number(data.codcategoria) } },
-                conta: { connect: { codconta: Number(data.codconta) } },
-                status: { connect: { codstatus: Number(data.codstatus) } },
-                formapagamento: { connect: { codformpag: Number(data.codformpag) } },
+                usuario: { connect: { codUsuario: codUsuario } },
+                categoria: { connect: { codCategoria: Number(data.codCategoria) } },
+                conta: { connect: { codConta: Number(data.codConta) } },
+                status: { connect: { codStatus: Number(data.codStatus) } },
+                formapagamento: { connect: { codFormPag: Number(data.codFormPag) } },
 
-                ...(data.codcartao && {
-                    cartao: { connect: { codcartao: Number(data.codcartao) } },
+                ...(data.codCartao && {
+                    cartao: { connect: { codCartao: Number(data.codCartao) } },
                 }),
             },
         })
     }
 
     async update(
-        codmovimentacao: number | string | bigint,
-        codusuario: number,
+        codMovimentacao: number | string | bigint,
+        codUsuario: number,
         data: any,
     ) {
-        const idBigInt = BigInt(String(codmovimentacao).trim());
+        const idBigInt = BigInt(String(codMovimentacao).trim());
 
-        const valorunit = data.valorunit !== undefined && data.valorunit !== null && data.valorunit !== '' ? Number(data.valorunit) : undefined;
-        const porcjuros = data.porcjuros !== undefined && data.porcjuros !== null && data.porcjuros !== '' ? Number(data.porcjuros) : undefined;
-        const valorjuros = data.valorjuros !== undefined && data.valorjuros !== null && data.valorjuros !== '' ? Number(data.valorjuros) : undefined;
-        const valortotalpendente = data.valortotalpendente !== undefined && data.valortotalpendente !== null && data.valortotalpendente !== '' ? Number(data.valortotalpendente) : undefined;
+        const valorUnit = data.valorUnit !== undefined && data.valorUnit !== null && data.valorUnit !== '' ? Number(data.valorUnit) : undefined;
+        const porcJuros = data.porcJuros !== undefined && data.porcJuros !== null && data.porcJuros !== '' ? Number(data.porcJuros) : undefined;
+        const valorJuros = data.valorJuros !== undefined && data.valorJuros !== null && data.valorJuros !== '' ? Number(data.valorJuros) : undefined;
+        const valorTotalPendente = data.valorTotalPendente !== undefined && data.valorTotalPendente !== null && data.valorTotalPendente !== '' ? Number(data.valorTotalPendente) : undefined;
 
         return prisma.movimentacao.update({
             where: {
-                codmovimentacao: idBigInt,
-                codusuario: codusuario, 
+                codMovimentacao: idBigInt,
+                codUsuario: codUsuario, 
             },
             data: {
-                datamov: data.datamov ? new Date(data.datamov) : undefined,
-                datafimmov: data.datafimmov ? new Date(data.datafimmov) : undefined,
-                datafechamento: data.datafechamento ? new Date(data.datafechamento) : undefined,
-                dataintegracao: data.dataintegracao ? new Date(data.dataintegracao) : undefined,
-                dataatualizacao: new Date(),
+                dataMov: data.dataMov ? new Date(data.dataMov) : undefined,
+                dataFimMov: data.dataFimMov ? new Date(data.dataFimMov) : undefined,
+                dataFechamento: data.dataFechamento ? new Date(data.dataFechamento) : undefined,
+                dataIntegracao: data.dataIntegracao ? new Date(data.dataIntegracao) : undefined,
+                dataAtualizacao: new Date(),
 
-                descmovimento: data.descmovimento !== undefined ? data.descmovimento : undefined,
-                indativo: data.indativo !== undefined ? Boolean(data.indativo) : undefined,
+                descMovimento: data.descMovimento !== undefined ? data.descMovimento : undefined,
+                indAtivo: data.indAtivo !== undefined ? Boolean(data.indAtivo) : undefined,
 
-                valorunit: valorunit,
-                porcjuros: porcjuros,
-                valorjuros: valorjuros,
-                valortotalpendente: valortotalpendente,
+                valorUnit: valorUnit,
+                porcJuros: porcJuros,
+                valorJuros: valorJuros,
+                valorTotalPendente: valorTotalPendente,
 
-                tipoparcelamento: data.tipoparcelamento !== undefined && data.tipoparcelamento !== '' ? Number(data.tipoparcelamento) : undefined,
-                qtdparcatual: data.qtdparcatual !== undefined && data.qtdparcatual !== '' ? Number(data.qtdparcatual) : undefined,
-                qtdparcfinal: data.qtdparcfinal !== undefined && data.qtdparcfinal !== '' ? Number(data.qtdparcfinal) : undefined,
-                qtdparcpendente: data.qtdparcpendente !== undefined && data.qtdparcpendente !== '' ? Number(data.qtdparcpendente) : undefined,
+                tipoParcelamento: data.tipoParcelamento !== undefined && data.tipoParcelamento !== '' ? Number(data.tipoParcelamento) : undefined,
+                qtdParcAtual: data.qtdParcAtual !== undefined && data.qtdParcAtual !== '' ? Number(data.qtdParcAtual) : undefined,
+                qtdParcFinal: data.qtdParcFinal !== undefined && data.qtdParcFinal !== '' ? Number(data.qtdParcFinal) : undefined,
+                qtdParcPendente: data.qtdParcPendente !== undefined && data.qtdParcPendente !== '' ? Number(data.qtdParcPendente) : undefined,
 
-                ...(data.codcategoria && { categoria: { connect: { codcategoria: Number(data.codcategoria) } } }),
-                ...(data.codconta && { conta: { connect: { codconta: Number(data.codconta) } } }),
-                ...(data.codstatus && { status: { connect: { codstatus: Number(data.codstatus) } } }),
-                ...(data.codformpag && { formapagamento: { connect: { codformpag: Number(data.codformpag) } } }),
+                ...(data.codCategoria && { categoria: { connect: { codCategoria: Number(data.codCategoria) } } }),
+                ...(data.codConta && { conta: { connect: { codConta: Number(data.codConta) } } }),
+                ...(data.codStatus && { status: { connect: { codStatus: Number(data.codStatus) } } }),
+                ...(data.codFormPag && { formapagamento: { connect: { codFormPag: Number(data.codFormPag) } } }),
 
-                ...(data.codcartao !== undefined
-                    ? data.codcartao
-                        ? { cartao: { connect: { codcartao: Number(data.codcartao) } } }
+                ...(data.codCartao !== undefined
+                    ? data.codCartao
+                        ? { cartao: { connect: { codCartao: Number(data.codCartao) } } }
                         : { cartao: { disconnect: true } }
                     : {}),
             },
@@ -95,27 +95,27 @@ export class MovimentacaoRepository {
     }
 
     async delete(
-        codmovimentacao: number | string | bigint,
-        codusuario: number
+        codMovimentacao: number | string | bigint,
+        codUsuario: number
     ) {
-        const idBigInt = BigInt(String(codmovimentacao).trim());
+        const idBigInt = BigInt(String(codMovimentacao).trim());
         
         return prisma.movimentacao.delete({
             where: {
-                codmovimentacao: idBigInt,
-                codusuario: codusuario
+                codMovimentacao: idBigInt,
+                codUsuario: codUsuario
             },
         });
     }
 
     async findById(
-        codmovimentacao: number | string | bigint,
-        codusuario: number
+        codMovimentacao: number | string | bigint,
+        codUsuario: number
     ) {
         return prisma.movimentacao.findFirst({
             where: {
-                codmovimentacao: BigInt(String(codmovimentacao).trim()),
-                codusuario: codusuario
+                codMovimentacao: BigInt(String(codMovimentacao).trim()),
+                codUsuario: codUsuario
             },
             include: {
                 categoria: true,
@@ -128,137 +128,153 @@ export class MovimentacaoRepository {
     }
 
 async findAll(
-    params: { 
-        page: number; 
-        size: number; 
-        sort?: string; 
-        descmovimento?: string; 
-        codcategoria?: number; 
-        codconta?: number;
-        codcartao?: number;
-        datainicio?: string | Date; 
-        datafim?: string | Date;    
-    }, 
-    codusuario: number
-) {
-    const { page, size, sort, descmovimento, codcategoria,codcartao, codconta, datainicio, datafim } = params;
+        params: { 
+            page: number; 
+            size: number; 
+            sort?: string; 
+            descMovimento?: string; 
+            codCategoria?: number; 
+            codConta?: number;
+            codCartao?: number;
+            dataInicio?: string | Date; 
+            dataFim?: string | Date;    
+        }, 
+        codUsuario: number
+    ) {
+        const { page, size, sort, descMovimento, codCategoria, codCartao, codConta, dataInicio, dataFim } = params;
 
-
-    const where: any = {
-        codusuario: codusuario
-    };
-    
-    if (descmovimento && descmovimento.trim() !== "") {
-        where.descmovimento = { contains: descmovimento.trim(), mode: 'insensitive' };
-    }
-    
-    if (codcategoria !== undefined && codcategoria !== null && !isNaN(Number(codcategoria)) && Number(codcategoria) > 0) {
-        where.codcategoria = Number(codcategoria);
-    }
-    
-    if (codconta !== undefined && codconta !== null && !isNaN(Number(codconta)) && Number(codconta) > 0) {
-        where.codconta = Number(codconta);
-    }
-
-   if (codcartao !== undefined && codcartao !== null && !isNaN(Number(codcartao)) && Number(codcartao) > 0) {
-        where.codcartao = Number(codcartao);
-    }
-    
-    const parseDataBR = (dataStr: any): Date | null => {
-        if (!dataStr || typeof dataStr !== 'string' || dataStr.includes('undefined') || dataStr.includes('null')) {
-            return dataStr instanceof Date ? dataStr : null;
+        const where: any = {
+            codUsuario: codUsuario
+        };
+        
+        if (descMovimento && descMovimento.trim() !== "") {
+            where.descMovimento = { contains: descMovimento.trim(), mode: 'insensitive' };
         }
         
-        const partes = dataStr.split('/');
-        if (partes.length === 3) {
-            const [dia, mes, ano] = partes;
-            // Cria no formato ISO: AAAA-MM-DD
-            const dataValida = new Date(`${ano}-${mes}-${dia}T00:00:00`);
-            return isNaN(dataValida.getTime()) ? null : dataValida;
+        if (codCategoria !== undefined && codCategoria !== null && !isNaN(Number(codCategoria)) && Number(codCategoria) > 0) {
+            where.codCategoria = Number(codCategoria);
         }
         
-        const tentativaDireta = new Date(dataStr);
-        return isNaN(tentativaDireta.getTime()) ? null : tentativaDireta;
-    };
-    const dateInicio = parseDataBR(datainicio);
-    const dateFim = parseDataBR(datafim);
-
-    if (dateInicio || dateFim) {
-        where.datamov = {};
-
-        if (dateInicio) {
-            dateInicio.setHours(0, 0, 0, 0);
-            where.datamov.gte = dateInicio;
+        if (codConta !== undefined && codConta !== null && !isNaN(Number(codConta)) && Number(codConta) > 0) {
+            where.codConta = Number(codConta);
         }
 
-        if (dateFim) {
-            dateFim.setHours(23, 59, 59, 999);
-            where.datamov.lte = dateFim;
+        if (codCartao !== undefined && codCartao !== null && !isNaN(Number(codCartao)) && Number(codCartao) > 0) {
+            where.codCartao = Number(codCartao);
         }
+        
+        const parseDataBR = (dataStr: any): Date | null => {
+            if (!dataStr || dataStr === 'undefined' || dataStr === 'null') {
+                return null;
+            }
+            
+            if (dataStr instanceof Date) {
+                return isNaN(dataStr.getTime()) ? null : dataStr;
+            }
+
+            if (typeof dataStr === 'string') {
+                const partes = dataStr.split('/');
+                if (partes.length === 3) {
+                    const [dia, mes, ano] = partes;
+                    const dataValida = new Date(`${ano}-${mes}-${dia}T00:00:00`);
+                    return isNaN(dataValida.getTime()) ? null : dataValida;
+                }
+                
+                const tentativaDireta = new Date(dataStr);
+                return isNaN(tentativaDireta.getTime()) ? null : tentativaDireta;
+            }
+
+            return null;
+        };
+
+        const dateInicio = parseDataBR(dataInicio);
+        const dateFim = parseDataBR(dataFim);
+
+        if (dateInicio || dateFim) {
+            const filtroData: any = {};
+
+            if (dateInicio && !isNaN(dateInicio.getTime())) {
+                dateInicio.setHours(0, 0, 0, 0);
+                filtroData.gte = dateInicio;
+            }
+
+            if (dateFim && !isNaN(dateFim.getTime())) {
+                dateFim.setHours(23, 59, 59, 999);
+                filtroData.lte = dateFim;
+            }
+
+            if (Object.keys(filtroData).length > 0) {
+                where.dataMov = filtroData;
+            }
+        }
+
+        let orderBy: any = { dataMov: 'desc' };
+        if (sort) {
+            const [field, order] = sort.split(',');
+            orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
+        }
+
+        const [content, totalElements] = await prisma.$transaction([
+            prisma.movimentacao.findMany({
+                where,
+                include: {
+                    categoria: true,
+                    conta: true,
+                    cartao: true,
+                    status: true,
+                    formapagamento: true,
+                },
+                orderBy,
+                skip: page * size,
+                take: size,
+            }),
+            prisma.movimentacao.count({ where })
+        ]);
+
+        const totalPages = Math.ceil(totalElements / size);
+
+        return {
+            content,
+            page,
+            size,
+            totalElements,
+            totalPages,
+            firstPage: page === 0,
+            lastPage: page >= totalPages - 1 || totalPages === 0
+        };
     }
 
-    let orderBy: any = { datamov: 'desc' };
-    if (sort) {
-        const [field, order] = sort.split(',');
-        orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
-    }
-
-    const [content, totalElements] = await prisma.$transaction([
-        prisma.movimentacao.findMany({
-            where,
-            include: {
-                categoria: true,
-                conta: true,
-                cartao: true,
-                status: true,
-                formapagamento: true,
-            },
-            orderBy,
-            skip: page * size,
-            take: size,
-        }),
-        prisma.movimentacao.count({ where })
-    ]);
-
-    const totalPages = Math.ceil(totalElements / size);
-
-    return {
-        content,
-        page,
-        size,
-        totalElements,
-        totalPages,
-        firstPage: page === 0,
-        lastPage: page >= totalPages - 1 || totalPages === 0
-    };
-}
-
-    async findAllView(codusuario: number): Promise<any[]> {
+    async findAllView(codUsuario: number): Promise<any[]> {
         return prisma.$queryRaw`
             SELECT 
-                c.desccategoria,
-                SUM(m.valorunit) AS valor_total,
+                c."descCategoria",
+                SUM(m."valorUnit") AS valor_total,
                 COUNT(*) AS quantidade
             FROM gestao.movimentacao m
-            INNER JOIN gestao.categoria c ON c.codcategoria = m.codcategoria
-            WHERE m.codusuario = ${codusuario}
-            GROUP BY c.desccategoria
+            INNER JOIN gestao.categoria c ON c."codCategoria" = m."codCategoria"
+            WHERE m."codUsuario" = ${codUsuario}
+            GROUP BY c."descCategoria"
         `
     }
 
-    async findAtivas() {
-    return prisma.movimentacao.findMany({
-        where: {
-            indativo: true
-        }
-    });
+    async findAtivas(codUsuario: number) {
+        return prisma.movimentacao.findMany({
+            where: {
+                indAtivo: true,
+                codUsuario: codUsuario
+            }
+        });
     }
-async updateCron(codmovimentacao: number, data: any) {
-    return prisma.movimentacao.update({
-        where: {
-            codmovimentacao
-        },
-        data
-    });
-}
+
+    async updateCron(codMovimentacao: number | string | bigint, codUsuario: number, data: any) {
+        const idBigInt = BigInt(String(codMovimentacao).trim());
+        
+        return prisma.movimentacao.update({
+            where: {
+                codMovimentacao: idBigInt,
+                codUsuario: codUsuario
+            },
+            data
+        });
+    }
 }

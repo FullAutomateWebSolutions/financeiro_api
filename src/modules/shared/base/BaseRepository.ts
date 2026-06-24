@@ -1,24 +1,31 @@
-
 export class BaseRepository<T> {
   constructor(
     protected model: any,
   ) {}
 
-  async findAll() {
-    return this.model.findMany()
-  }
-
-  async findById(id: number, field: string) {
-    return this.model.findUnique({
+  async findAll(codUsuario: number) {
+    return this.model.findMany({
       where: {
-        [field]: id,
+        codUsuario,
       },
     })
   }
 
-  async create(data: T) {
+  async findById(id: number, field: string, codUsuario: number) {
+    return this.model.findFirst({
+      where: {
+        [field]: id,
+        codUsuario,
+      },
+    })
+  }
+
+  async create(data: T, codUsuario: number) {
     return this.model.create({
-      data,
+      data: {
+        ...data,
+        codUsuario,
+      },
     })
   }
 
@@ -26,19 +33,22 @@ export class BaseRepository<T> {
     id: number,
     field: string,
     data: Partial<T>,
+    codUsuario: number,
   ) {
-    return this.model.update({
+    return this.model.updateMany({
       where: {
         [field]: id,
+        codUsuario,
       },
       data,
     })
   }
 
-  async delete(id: number, field: string) {
-    return this.model.delete({
+  async delete(id: number, field: string, codUsuario: number) {
+    return this.model.deleteMany({
       where: {
         [field]: id,
+        codUsuario,
       },
     })
   }

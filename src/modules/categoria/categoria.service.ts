@@ -7,6 +7,6 @@ extends BaseService
   private categoriaRepository =  new CategoriaRepository();
 
   constructor() {
-    super( new CategoriaRepository(), 'codcategoria' )
+    super( new CategoriaRepository(), 'codCategoria' )
   }
 }

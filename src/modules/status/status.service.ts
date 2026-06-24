@@ -4,6 +4,6 @@ import {StatusRepository } from './status.repository';
 
 export class StatusService extends BaseService {
     constructor() {
-        super(new StatusRepository(), 'codstatus')
+        super(new StatusRepository(), 'codStatus')
     }
 }

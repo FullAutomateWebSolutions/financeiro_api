@@ -14,7 +14,7 @@ export class AuthRepository {
         nome: data.nome,
         email: data.email,
         senha: data.senha, 
-        indativo: true,
+        indAtivo: true,
       },
     })
   }

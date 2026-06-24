@@ -25,7 +25,7 @@ login = async (request: FastifyRequest, reply: FastifyReply) => {
 
     const token = jwt.sign(
       {
-        codusuario: user.codusuario,
+        codUsuario: user.codUsuario,
         email: user.email,
         role: user.role
       }, 

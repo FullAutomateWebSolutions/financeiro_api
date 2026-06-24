@@ -8,12 +8,14 @@ datasource db {
 }
 
 model cartao {
-  codcartao        Int                @id @default(autoincrement())
-  tipocartao       String
-  desccartao       String
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codCartao        Int                @id @default(autoincrement())
+  tipoCartao       String
+  descCartao       String
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codUsuario       Int
+  usuario          usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_cartao_usuario")
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
 
@@ -21,11 +23,13 @@ model cartao {
 }
 
 model categoria {
-  codcategoria     Int                @id @default(autoincrement())
-  desccategoria    String
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codCategoria     Int                @id @default(autoincrement())
+  descCategoria    String
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codUsuario       Int
+  usuario          usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_usuario")
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
 
@@ -33,12 +37,14 @@ model categoria {
 }
 
 model conta {
-  codconta         Int                @id @default(autoincrement())
-  tipoconta        String
-  descconta        String
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codConta         Int                @id @default(autoincrement())
+  tipoConta        String
+  descConta        String
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codUsuario       Int
+  usuario          usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_conta_usuario")
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
 
@@ -46,12 +52,14 @@ model conta {
 }
 
 model formapagamento {
-  codformpag       Int                @id @default(autoincrement())
-  tipoformpag      String
-  descformpag      String
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codFormPag       Int                @id @default(autoincrement())
+  tipoFormPag      String
+  descFormPag      String
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codUsuario       Int
+  usuario          usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_formpag_usuario")
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
 
@@ -59,105 +67,112 @@ model formapagamento {
 }
 
 model movimentacao {
-  codmovimentacao    BigInt             @id @default(autoincrement())
-  datamov            DateTime           @db.Timestamp(6)
-  descmovimento      String
-  valorunit          Decimal            @db.Decimal(12, 2)
-  porcjuros          Decimal?           @default(0) @db.Decimal(12, 2)
-  valorjuros         Decimal?           @default(0) @db.Decimal(12, 2)
-  tipoparcelamento   Int?
-  qtdparcatual       Int?
-  qtdparcfinal       Int?
-  qtdparcpendente    Int?
-  valortotalpendente Decimal?           @db.Decimal(12, 2)
-  datafimmov         DateTime?          @db.Timestamp(6)
-  codformpag         Int
-  codconta           Int
-  codstatus          Int
-  codcategoria       Int
-  codcartao          Int?
-  codusuario         Int
-  indativo           Boolean?           @default(true)
-  datacriacao        DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao    DateTime?          @default(now()) @db.Timestamp(6)
-  dataintegracao     DateTime?          @db.Timestamp(6)
-  datafechamento     DateTime?          @db.Timestamp(6)
-  cartao             cartao?            @relation(fields: [codcartao], references: [codcartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_cartao")
-  categoria          categoria          @relation(fields: [codcategoria], references: [codcategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_categoria")
-  conta              conta              @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_conta")
-  formapagamento     formapagamento     @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_formapag")
-  status             status             @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_status")
-  usuario            usuario            @relation(fields: [codusuario], references: [codusuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_usuario")
+  codMovimentacao    BigInt             @id @default(autoincrement())
+  dataMov            DateTime           @db.Timestamp(6)
+  descMovimento      String
+  valorUnit          Decimal            @db.Decimal(12, 2)
+  porcJuros          Decimal?           @default(0) @db.Decimal(12, 2)
+  valorJuros         Decimal?           @default(0) @db.Decimal(12, 2)
+  tipoParcelamento   Int?
+  qtdParcAtual       Int?
+  qtdParcFinal       Int?
+  qtdParcPendente    Int?
+  valorTotalPendente Decimal?           @db.Decimal(12, 2)
+  dataFimMov         DateTime?          @db.Timestamp(6)
+  codFormPag         Int
+  codConta           Int
+  codStatus          Int
+  codCategoria       Int
+  codCartao          Int?
+  codUsuario         Int
+  indAtivo           Boolean?           @default(true)
+  dataCriacao        DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao    DateTime?          @default(now()) @db.Timestamp(6)
+  dataIntegracao     DateTime?          @db.Timestamp(6)
+  dataFechamento     DateTime?          @db.Timestamp(6)
+  cartao             cartao?            @relation(fields: [codCartao], references: [codCartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_cartao")
+  categoria          categoria          @relation(fields: [codCategoria], references: [codCategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_categoria")
+  conta              conta              @relation(fields: [codConta], references: [codConta], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_conta")
+  formapagamento     formapagamento     @relation(fields: [codFormPag], references: [codFormPag], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_formapag")
+  status             status             @relation(fields: [codStatus], references: [codStatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_status")
+  usuario            usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_usuario")
   movimentacaohist   movimentacaohist[]
 
-  @@index([codcartao], map: "idx_mov_cartao")
-  @@index([codcategoria], map: "idx_mov_categoria")
-  @@index([codconta], map: "idx_mov_conta")
-  @@index([datamov], map: "idx_mov_data")
-  @@index([codstatus], map: "idx_mov_status")
-  @@index([codusuario], map: "idx_mov_usuario")
+  @@index([codCartao], map: "idx_mov_cartao")
+  @@index([codCategoria], map: "idx_mov_categoria")
+  @@index([codConta], map: "idx_mov_conta")
+  @@index([dataMov], map: "idx_mov_data")
+  @@index([codStatus], map: "idx_mov_status")
+  @@index([codUsuario], map: "idx_mov_usuario")
   @@schema("gestao")
 }
 
 model movimentacaohist {
-  codmovimentacaohist BigInt          @id @default(autoincrement())
-  codmovimentacao     BigInt?
-  datamov             DateTime?       @db.Timestamp(6)
-  descmovimento       String?
-  valorunit           Decimal?        @db.Decimal(12, 2)
-  tipoparcelamento    Int?
-  qtdparcatual        Int?
-  qtdparcfinal        Int?
-  qtdparcpendente     Int?
-  valortotalpendente  Decimal?        @db.Decimal(12, 2)
-  datafimmov          DateTime?       @db.Timestamp(6)
-  codformpag          Int?
-  codconta            Int?
-  codstatus           Int?
-  codcategoria        Int?
-  codcartao           Int?
-  codusuario          Int?
-  indativo            Boolean?
-  datacriacao         DateTime?       @db.Timestamp(6)
-  dataatualizacao     DateTime?       @db.Timestamp(6)
-  dataintegracao      DateTime?       @db.Timestamp(6)
-  datafechamento      DateTime?       @db.Timestamp(6)
-  datahistorico       DateTime?       @default(now()) @db.Timestamp(6)
-  cartao              cartao?         @relation(fields: [codcartao], references: [codcartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_cartao")
-  categoria           categoria?      @relation(fields: [codcategoria], references: [codcategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_categoria")
-  conta               conta?          @relation(fields: [codconta], references: [codconta], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_conta")
-  formapagamento      formapagamento? @relation(fields: [codformpag], references: [codformpag], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_formapag")
-  movimentacao        movimentacao?   @relation(fields: [codmovimentacao], references: [codmovimentacao], onUpdate: NoAction, map: "fk_hist_mov")
-  status              status?         @relation(fields: [codstatus], references: [codstatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_status")
-  usuario             usuario?        @relation(fields: [codusuario], references: [codusuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_usuario")
+  codMovimentacaoHist BigInt          @id @default(autoincrement())
+  codMovimentacao     BigInt?
+  dataMov             DateTime?       @db.Timestamp(6)
+  descMovimento       String?
+  valorUnit           Decimal?        @db.Decimal(12, 2)
+  tipoParcelamento    Int?
+  qtdParcAtual        Int?
+  qtdParcFinal        Int?
+  qtdParcPendente     Int?
+  valorTotalPendente  Decimal?        @db.Decimal(12, 2)
+  dataFimMov          DateTime?       @db.Timestamp(6)
+  codFormPag          Int?
+  codConta            Int?
+  codStatus           Int?
+  codCategoria        Int?
+  codCartao           Int?
+  codUsuario          Int?
+  indAtivo            Boolean?
+  dataCriacao         DateTime?       @db.Timestamp(6)
+  dataAtualizacao     DateTime?       @db.Timestamp(6)
+  dataIntegracao      DateTime?       @db.Timestamp(6)
+  dataFechamento      DateTime?       @db.Timestamp(6)
+  dataHistorico       DateTime?       @default(now()) @db.Timestamp(6)
+  cartao              cartao?         @relation(fields: [codCartao], references: [codCartao], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_cartao")
+  categoria           categoria?      @relation(fields: [codCategoria], references: [codCategoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_categoria")
+  conta               conta?          @relation(fields: [codConta], references: [codConta], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_conta")
+  formapagamento      formapagamento? @relation(fields: [codFormPag], references: [codFormPag], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_formapag")
+  movimentacao        movimentacao?   @relation(fields: [codMovimentacao], references: [codMovimentacao], onUpdate: NoAction, map: "fk_hist_mov")
+  status              status?         @relation(fields: [codStatus], references: [codStatus], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_status")
+  usuario             usuario?        @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_usuario")
 
   @@schema("gestao")
 }
 
 model status {
-  codstatus        Int                @id @default(autoincrement())
-  descstatus       String             @db.VarChar(100)
-  desccompleta     String?            @db.VarChar(255)
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codStatus        Int                @id @default(autoincrement())
+  descStatus       String             @db.VarChar(100)
+  descCompleta     String?            @db.VarChar(255)
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  codUsuario       Int
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
+  usuario          usuario            @relation(fields: [codUsuario], references: [codUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_status_usuario")
 
   @@schema("gestao")
 }
 
 model usuario {
-  codusuario       Int                @id @default(autoincrement())
+  codUsuario       Int                @id @default(autoincrement())
   nome             String             @db.VarChar(150)
   email            String             @unique @db.VarChar(150)
   senha            String             @db.VarChar(255)
   role             usuario_role       @default(USER)
-  indativo         Boolean?           @default(true)
-  datacriacao      DateTime?          @default(now()) @db.Timestamp(6)
-  dataatualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  indAtivo         Boolean?           @default(true)
+  dataCriacao      DateTime?          @default(now()) @db.Timestamp(6)
+  dataAtualizacao  DateTime?          @default(now()) @db.Timestamp(6)
+  cartao           cartao[]
+  categoria        categoria[]
+  conta            conta[]
+  formapagamento   formapagamento[]
   movimentacao     movimentacao[]
   movimentacaohist movimentacaohist[]
+  status           status[]
 
   @@schema("gestao")
 }

@@ -24,7 +24,7 @@ export class AuthService {
 
   async login(data: LoginDTO) {
     const user = await this.repository.findByEmail(data.email)
-    if (!user || !user.indativo) {
+    if (!user || !user.indAtivo) {
       throw new Error('E-mail ou senha inválidos.')
     }
 
@@ -34,7 +34,7 @@ export class AuthService {
     }
 
     return {
-      codusuario: user.codusuario,
+      codUsuario: user.codUsuario,
       nome: user.nome,
       email: user.email,
       role: user.role

@@ -2,24 +2,24 @@ import { z } from 'zod'
 
 export const createMovimentacaoSchema = z
   .object({
-    datamov: z.coerce.date(),
+    dataMov: z.coerce.date(),
 
-    descmovimento: z
+    descMovimento: z
       .string()
       .min(3, 'Descrição deve possuir no mínimo 3 caracteres')
       .max(255, 'Descrição deve possuir no máximo 255 caracteres'),
 
-    valorunit: z.coerce
+    valorUnit: z.coerce
       .number({ required_error: 'Valor unitário é obrigatório' })
       .min(0, 'Valor unitário não pode ser negativo'),
 
-    porcjuros: z.coerce
+    porcJuros: z.coerce
       .number()
       .min(0, 'Percentual de juros não pode ser negativo')
       .default(0)
       .optional(), 
 
-    tipoparcelamento: z
+    tipoParcelamento: z
       .number({ required_error: 'Tipo de parcelamento é obrigatório' })
       .int()
       .refine(
@@ -30,48 +30,48 @@ export const createMovimentacaoSchema = z
         },
       ),
 
-    qtdparcatual: z.coerce
+    qtdParcAtual: z.coerce
       .number()
       .int()
       .min(1)
       .default(1)
       .optional(),
 
-    qtdparcfinal: z.coerce
+    qtdParcFinal: z.coerce
       .number()
       .int()
       .min(1)
       .default(1)
       .optional(),
 
-    codformpag: z.coerce
+    codFormPag: z.coerce
       .number()
       .int()
       .positive('Forma de pagamento inválida'),
 
-    codconta: z.coerce
+    codConta: z.coerce
       .number()
       .int()
       .positive('Conta inválida'),
 
-    codstatus: z.coerce
+    codStatus: z.coerce
       .number()
       .int()
       .positive('Status inválido'),
 
-    codcategoria: z.coerce
+    codCategoria: z.coerce
       .number()
       .int()
       .positive('Categoria inválida'),
 
-    codcartao: z.coerce
+    codCartao: z.coerce
       .number()
       .int()
       .positive()
       .nullable()
       .optional(),
 
-    dataintegracao: z
+    dataIntegracao: z
       .coerce
       .date()
       .nullable()
@@ -79,17 +79,17 @@ export const createMovimentacaoSchema = z
   })
   .refine(
     (data) => {
-      const atual = data.qtdparcatual ?? 1;
-      const final = data.qtdparcfinal ?? 1;
+      const atual = data.qtdParcAtual ?? 1;
+      const final = data.qtdParcFinal ?? 1;
       return atual <= final;
     },
     {
-      path: ['qtdparcatual'],
+      path: ['qtdParcAtual'],
       message: 'Parcela atual não pode ser maior que a parcela final',
     },
   )
 
 export type CreateMovimentacaoDTO = z.infer<typeof createMovimentacaoSchema>
 export type MovimentacaoComUsuarioDTO = CreateMovimentacaoDTO & {
-  codusuario: number
+  codUsuario: number
 }

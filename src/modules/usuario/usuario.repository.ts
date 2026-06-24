@@ -10,33 +10,33 @@ export class UsuarioRepository extends BaseRepository<usuario_role>{
     async findAll() {
         return prisma.usuario.findMany({
             select: {
-                codusuario: true,
+                codUsuario: true,
                 nome: true,
                 email: true,
                 role: true,
-                indativo: true,
+                indAtivo: true,
             },
             orderBy: { nome: 'asc' }
         });
     }
 
-    async updateUser(codusuario: number, data: { nome?: string; email?: string; role?: usuario_role; indativo?: boolean }) {
+    async updateUser(codUsuario: number, data: { nome?: string; email?: string; role?: usuario_role; indAtivo?: boolean }) {
         return prisma.usuario.update({
-            where: { codusuario },
+            where: { codUsuario },
             data,
             select: {
-                codusuario: true,
+                codUsuario: true,
                 nome: true,
                 email: true,
                 role: true,
-                indativo: true,
+                indAtivo: true,
             }
         });
     }
 
-    async deleteUser(codusuario: number) {
+    async deleteUser(codUsuario: number) {
         return prisma.usuario.delete({
-            where: { codusuario }
+            where: { codUsuario }
         });
     }
 }

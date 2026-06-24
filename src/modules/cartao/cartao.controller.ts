@@ -3,6 +3,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import {BaseController} from '../shared/base/BaseController';
 import { CartaoService } from './cartao.service';
 import { created } from './cartao.schema';
+import { autenticarUsuario } from '../shared/utils/autenticarUsuario';
 
 export class CartaoController extends  BaseController {
     
@@ -13,9 +14,10 @@ export class CartaoController extends  BaseController {
   }
 
    criar = async ( req: FastifyRequest, reply: FastifyReply ) => {
-     const body = created.parse(req.body);
-      // const body = z.array(updateLocationSchema).parse(request.body);
-    const result = await this.cartaoService.create(body)
+      const body = created.parse(req.body);
+       const usuario = await autenticarUsuario(req, reply);
+       if (!usuario) return;
+    const result = await this.cartaoService.create(body, usuario.codUsuario)
     return reply.send(result)
   }
   
