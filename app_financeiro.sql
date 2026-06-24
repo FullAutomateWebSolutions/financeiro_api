@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS gestao.usuario (
 );
 
 INSERT INTO gestao.usuario (nome, email, senha, role, indativo)
-SELECT 'Administrador Padrao', 'admin@sistema.com', '$2a$10$7R0Z.W.U6vXwIunZ2CmsEuXF8A6pSOnuFfJqGk3O7z.eLhIby.r2C', 'ADMIN', TRUE 
+SELECT 'Administrador Padrao', 'admin@sistema.com', '$2b$10$cHpdXXIY5Gd0f8k2aisDE.fGzl/xRH/evZ0bZ3INDDZBUYujZ9guG', 'ADMIN', TRUE 
 WHERE NOT EXISTS (
     SELECT 1 FROM gestao.usuario WHERE email = 'admin@sistema.com'
 );
@@ -338,7 +338,7 @@ WHERE NOT EXISTS (
 COMMIT;
 
 -- ==========================================================
--- VALIDAÇÃO FINAL
+-- VALIDAÇÃO FINAL E CONTROLE DE ACESSO
 -- ==========================================================
 
 SELECT 'USUARIO' AS tabela, COUNT(*) registros FROM gestao.usuario
@@ -356,3 +356,78 @@ UNION ALL
 SELECT 'MOVIMENTACAO', COUNT(*) FROM gestao.movimentacao
 UNION ALL
 SELECT 'MOVIMENTACAO_HIST', COUNT(*) FROM gestao.movimentacaohist;
+
+
+-- 1. Cria o usuário do banco se ele não existir
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_financeiro') THEN
+        CREATE USER app_financeiro WITH PASSWORD 'h5PY1MI6krfwr_p115';
+    END IF;
+END $$;
+
+-- 2. Garante conexão ao banco
+GRANT CONNECT ON DATABASE appdb TO app_financeiro;
+
+-- 3. Permissão para criar objetos (necessário para migrations)
+GRANT CREATE ON DATABASE appdb TO app_financeiro;
+
+-- 4. Remove permissões públicas do schema
+REVOKE ALL ON SCHEMA gestao FROM PUBLIC;
+REVOKE ALL ON ALL TABLES IN SCHEMA gestao FROM PUBLIC;
+
+-- 5. Permissão de uso e criação no schema
+GRANT USAGE ON SCHEMA gestao TO app_financeiro;
+GRANT CREATE ON SCHEMA gestao TO app_financeiro;
+
+-- 6. Permissões CRUD nas tabelas existentes
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gestao TO app_financeiro;
+
+-- 7. Permissões nas sequences
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA gestao TO app_financeiro;
+
+-- 8. Permissões futuras (tabelas novas)
+ALTER DEFAULT PRIVILEGES IN SCHEMA gestao
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_financeiro;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA gestao
+GRANT USAGE, SELECT ON SEQUENCES TO app_financeiro;
+
+-- 9.  IMPORTANTE: tornar o usuário dono do schema
+-- (necessário para ALTER TABLE funcionar sem erro 42501)
+ALTER SCHEMA gestao OWNER TO app_financeiro;
+
+-- 10.  Transferir ownership das tabelas existentes
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'gestao'
+    LOOP
+        EXECUTE format(
+            'ALTER TABLE gestao.%I OWNER TO app_financeiro',
+            r.tablename
+        );
+    END LOOP;
+END $$;
+
+-- 11.  Transferir ownership das sequences existentes
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT sequencename
+        FROM pg_sequences
+        WHERE schemaname = 'gestao'
+    LOOP
+        EXECUTE format(
+            'ALTER SEQUENCE gestao.%I OWNER TO app_financeiro',
+            r.sequencename
+        );
+    END LOOP;
+END $$;
+

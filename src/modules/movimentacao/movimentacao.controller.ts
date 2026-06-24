@@ -9,6 +9,12 @@ interface Decoded {
     email: string;
 }
 
+interface findAllpage{
+page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number , 
+ datainicio?: string | Date; 
+        datafim?: string | Date;  
+        codcartao?: number;  
+}
 export class MovimentacaoController {
     constructor(
         private service = new MovimentacaoService(),
@@ -41,15 +47,14 @@ export class MovimentacaoController {
             return null;
         }
     }
-
     create = async (request: FastifyRequest, reply: FastifyReply) => {
+        
         const usuarioLogado = await this.autenticarUsuario(request, reply);
         if (!usuarioLogado) return; 
 
         const result = await this.service.create(request.body, usuarioLogado.codusuario)
         return reply.status(201).send(result)
     }
-
     update = async (request: any, reply: FastifyReply) => {
         const usuarioLogado = await this.autenticarUsuario(request, reply);
         if (!usuarioLogado) return;
@@ -64,7 +69,6 @@ export class MovimentacaoController {
 
         return reply.send(result)
     }
-
     findAll = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const usuarioLogado = await this.autenticarUsuario(request, reply);
@@ -75,17 +79,25 @@ export class MovimentacaoController {
                 size,
                 sort,
                 descmovimento,
-                categoria,
-                conta
-            } = request.query as any;
+                codcategoria,
+                codconta,
+                datafim,
+                datainicio,
+                codcartao
+            } = request.query as findAllpage;
+           console.log(request.query)
 
             const result = await this.service.findAll({
                 page: page ? Number(page) : 0,
                 size: size ? Number(size) : 10,
                 sort: sort,
                 descmovimento: descmovimento,
-                codcategoria: categoria ? Number(categoria) : undefined,
-                codconta: conta ? Number(conta) : undefined,
+                codcategoria: codcategoria ? Number(codcategoria) : undefined,
+                codcartao: codcartao ? Number(codcartao) : undefined,
+                codconta: codconta   ? Number(codconta) : undefined,
+                 datainicio:  datainicio ? datainicio : undefined,
+             datafim:  datafim ? datafim : undefined
+
             }, usuarioLogado.codusuario);
 
             return reply.status(200).send(result);
@@ -93,7 +105,6 @@ export class MovimentacaoController {
             throw error;
         }
     }
-
     findById = async (request: any, reply: FastifyReply) => {
         const usuarioLogado = await this.autenticarUsuario(request, reply);
         if (!usuarioLogado) return;
@@ -101,7 +112,6 @@ export class MovimentacaoController {
         const result = await this.service.findById(request.params.id, usuarioLogado.codusuario)
         return reply.send(result)
     }
-
     delete = async (request: any, reply: FastifyReply) => {
         try {
             const usuarioLogado = await this.autenticarUsuario(request, reply);
@@ -120,7 +130,6 @@ export class MovimentacaoController {
             throw error;
         }
     }
-
     finalizar = async (request: any, reply: FastifyReply) => {
         const usuarioLogado = await this.autenticarUsuario(request, reply);
         if (!usuarioLogado) return;
@@ -128,7 +137,6 @@ export class MovimentacaoController {
         const result = await this.service.finalizar(request.params.id, usuarioLogado.codusuario)
         return reply.send(result)
     }
-
     findAllView = async (request: FastifyRequest, reply: FastifyReply) => {
         const usuarioLogado = await this.autenticarUsuario(request, reply);
         if (!usuarioLogado) return;

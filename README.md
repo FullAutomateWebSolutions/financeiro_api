@@ -159,3 +159,11 @@ Copie esse texto do token. Quando for testar a listagem ou criação de moviment
 
  npm i --save-dev @types/jsonwebtoken
  npm install dotenv
+
+ ┌──────── minuto (0)
+│ ┌────── hora (12)
+│ │ ┌──── dia do mês (*)
+│ │ │ ┌── mês (*)
+│ │ │ │ ┌ dia da semana (*)
+│ │ │ │ │
+0 12 * * *

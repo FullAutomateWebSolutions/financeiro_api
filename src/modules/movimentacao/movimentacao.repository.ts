@@ -30,7 +30,6 @@ export class MovimentacaoRepository {
                 datacriacao: data.datacriacao ? new Date(data.datacriacao) : new Date(),
                 dataatualizacao: data.dataatualizacao ? new Date(data.dataatualizacao) : new Date(),
 
-                // Conecta o relacionamento usando o id numérico mapeado do token
                 usuario: { connect: { codusuario: codusuario } },
                 categoria: { connect: { codcategoria: Number(data.codcategoria) } },
                 conta: { connect: { codconta: Number(data.codconta) } },
@@ -59,7 +58,7 @@ export class MovimentacaoRepository {
         return prisma.movimentacao.update({
             where: {
                 codmovimentacao: idBigInt,
-                codusuario: codusuario, // Garante que ninguém altere dados de outro usuário
+                codusuario: codusuario, 
             },
             data: {
                 datamov: data.datamov ? new Date(data.datamov) : undefined,
@@ -128,54 +127,111 @@ export class MovimentacaoRepository {
         })
     }
 
-    async findAll(params: { page: number; size: number; sort?: string; descmovimento?: string; codcategoria?: number; codconta?: number }, codusuario: number) {
-        const { page, size, sort, descmovimento, codcategoria, codconta } = params;
+async findAll(
+    params: { 
+        page: number; 
+        size: number; 
+        sort?: string; 
+        descmovimento?: string; 
+        codcategoria?: number; 
+        codconta?: number;
+        codcartao?: number;
+        datainicio?: string | Date; 
+        datafim?: string | Date;    
+    }, 
+    codusuario: number
+) {
+    const { page, size, sort, descmovimento, codcategoria,codcartao, codconta, datainicio, datafim } = params;
 
-        const where: any = {
-            codusuario: codusuario
-        };
-        
-        if (descmovimento) {
-            where.descmovimento = { contains: descmovimento, mode: 'insensitive' };
-        }
-        if (codcategoria) where.codcategoria = Number(codcategoria);
-        if (codconta) where.codconta = Number(codconta);
 
-        let orderBy: any = { datamov: 'desc' };
-        if (sort) {
-            const [field, order] = sort.split(',');
-            orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
-        }
-
-        const [content, totalElements] = await prisma.$transaction([
-            prisma.movimentacao.findMany({
-                where,
-                include: {
-                    categoria: true,
-                    conta: true,
-                    cartao: true,
-                    status: true,
-                    formapagamento: true,
-                },
-                orderBy,
-                skip: page * size,
-                take: size,
-            }),
-            prisma.movimentacao.count({ where })
-        ]);
-
-        const totalPages = Math.ceil(totalElements / size);
-
-        return {
-            content,
-            page,
-            size,
-            totalElements,
-            totalPages,
-            firstPage: page === 0,
-            lastPage: page >= totalPages - 1 || totalPages === 0
-        };
+    const where: any = {
+        codusuario: codusuario
+    };
+    
+    if (descmovimento && descmovimento.trim() !== "") {
+        where.descmovimento = { contains: descmovimento.trim(), mode: 'insensitive' };
     }
+    
+    if (codcategoria !== undefined && codcategoria !== null && !isNaN(Number(codcategoria)) && Number(codcategoria) > 0) {
+        where.codcategoria = Number(codcategoria);
+    }
+    
+    if (codconta !== undefined && codconta !== null && !isNaN(Number(codconta)) && Number(codconta) > 0) {
+        where.codconta = Number(codconta);
+    }
+
+   if (codcartao !== undefined && codcartao !== null && !isNaN(Number(codcartao)) && Number(codcartao) > 0) {
+        where.codcartao = Number(codcartao);
+    }
+    
+    const parseDataBR = (dataStr: any): Date | null => {
+        if (!dataStr || typeof dataStr !== 'string' || dataStr.includes('undefined') || dataStr.includes('null')) {
+            return dataStr instanceof Date ? dataStr : null;
+        }
+        
+        const partes = dataStr.split('/');
+        if (partes.length === 3) {
+            const [dia, mes, ano] = partes;
+            // Cria no formato ISO: AAAA-MM-DD
+            const dataValida = new Date(`${ano}-${mes}-${dia}T00:00:00`);
+            return isNaN(dataValida.getTime()) ? null : dataValida;
+        }
+        
+        const tentativaDireta = new Date(dataStr);
+        return isNaN(tentativaDireta.getTime()) ? null : tentativaDireta;
+    };
+    const dateInicio = parseDataBR(datainicio);
+    const dateFim = parseDataBR(datafim);
+
+    if (dateInicio || dateFim) {
+        where.datamov = {};
+
+        if (dateInicio) {
+            dateInicio.setHours(0, 0, 0, 0);
+            where.datamov.gte = dateInicio;
+        }
+
+        if (dateFim) {
+            dateFim.setHours(23, 59, 59, 999);
+            where.datamov.lte = dateFim;
+        }
+    }
+
+    let orderBy: any = { datamov: 'desc' };
+    if (sort) {
+        const [field, order] = sort.split(',');
+        orderBy = { [field]: order === 'desc' ? 'desc' : 'asc' };
+    }
+
+    const [content, totalElements] = await prisma.$transaction([
+        prisma.movimentacao.findMany({
+            where,
+            include: {
+                categoria: true,
+                conta: true,
+                cartao: true,
+                status: true,
+                formapagamento: true,
+            },
+            orderBy,
+            skip: page * size,
+            take: size,
+        }),
+        prisma.movimentacao.count({ where })
+    ]);
+
+    const totalPages = Math.ceil(totalElements / size);
+
+    return {
+        content,
+        page,
+        size,
+        totalElements,
+        totalPages,
+        firstPage: page === 0,
+        lastPage: page >= totalPages - 1 || totalPages === 0
+    };
+}
 
     async findAllView(codusuario: number): Promise<any[]> {
         return prisma.$queryRaw`
@@ -189,4 +245,20 @@ export class MovimentacaoRepository {
             GROUP BY c.desccategoria
         `
     }
+
+    async findAtivas() {
+    return prisma.movimentacao.findMany({
+        where: {
+            indativo: true
+        }
+    });
+    }
+async updateCron(codmovimentacao: number, data: any) {
+    return prisma.movimentacao.update({
+        where: {
+            codmovimentacao
+        },
+        data
+    });
+}
 }

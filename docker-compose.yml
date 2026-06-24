@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+
+    container_name: financeiro_api
+
+    restart: always
+
+    ports:
+      - "3001:3001"
+
+    # environment:
+    #   DATABASE_URL: postgresql://admin:h5PY1MI6krfwr_p9@163.176.246.55:5432/appbd
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    # command: >
+    #   sh -c "
+    #   npx prisma generate &&
+    #   npx prisma db push &&
+    #   npm run dev
+    #   "

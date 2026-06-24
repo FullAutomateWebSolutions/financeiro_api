@@ -13,6 +13,7 @@ import { movimentacaoRoutes } from "./modules/movimentacao/movimentacao.routes";
 import { statusRouter } from "./modules/status/status.routes";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { usuarioRoutes } from "./modules/usuario/usuarioRoutes";
+import { startMovimentacaoCron } from './modules/movimentacao/movimentacao.cron';
 
 const app = fastify({
   logger: true,
@@ -65,18 +66,18 @@ app.setErrorHandler(
 
 async function start() {
   try {
-    // 1. REGISTRAR O CORS PRIMEIRO (Evita bloqueios no navegador)
+    //  REGISTRAR O CORS PRIMEIRO (Evita bloqueios no navegador)
     await app.register(cors, {
       origin: "*", 
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     });
 
-    // 2. CONFIGURAR O @FASTIFY/JWT ( ESSENCIAL: DEVE VIR ANTES DAS ROTAS!)
+    //  CONFIGURAR O @FASTIFY/JWT ( ESSENCIAL: DEVE VIR ANTES DAS ROTAS!)
     await app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'chave_secreta_reserva'
     });
 
-    // 3. SWAGGER
+    //  SWAGGER
     await app.register(swagger, {
       openapi: {
         info: {
@@ -97,7 +98,6 @@ async function start() {
         security: [{ bearerAuth: [] }],
       },
     });
-
     await app.register(swaggerUI, {
       routePrefix: "/docs",
     });
@@ -110,44 +110,43 @@ async function start() {
     /* ==========================================
         REGISTRO DAS ROTAS DO SISTEMA
     ========================================== */
-    // Mudei o auth para cá, agora ele já enxerga o plugin do JWT carregado acima!
     await app.register(authRoutes, {
-      prefix: "/auth",
+      prefix: "/api/auth",
     });
     
     await app.register(categoriaRoutes, {
-      prefix: "/categoria",
+      prefix: "/api/categoria",
     });
 
     await app.register(usuarioRoutes, {
-      prefix: "/usuario",
+      prefix: "/api/usuario",
     });
 
     await app.register(statusRouter, {
-      prefix: "/status",
+      prefix: "/api/status",
     });
 
     await app.register(cartaoRoutes, {
-      prefix: "/cartao",
+      prefix: "/api/cartao",
     });
 
     await app.register(contaRoutes, {
-      prefix: "/conta",
+      prefix: "/api/conta",
     });
 
     await app.register(formaPagamentoRoute, {
-      prefix: "/formaPagamento",
+      prefix: "/api/formaPagamento",
     });
 
     await app.register(movimentacaoRoutes, {
-      prefix: "/movimentacao",
+      prefix: "/api/movimentacao",
     });
 
     await app.listen({
       host: "0.0.0.0",
       port,
     });
-
+    startMovimentacaoCron();
     console.log(` Server running on http://localhost:${port}`);
     console.log(` Swagger available at http://localhost:${port}/docs`);
   } catch (error) {
